@@ -1,14 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Nestora Pay</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nestora - Pay via UPI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .logo { font-size: 48px; margin-bottom: 12px; }
+        h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+        .subtitle { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 28px; }
+        .amount-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .amount-label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .amount { font-size: 40px; font-weight: 800; color: #a78bfa; }
+        .upi-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .upi-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .upi-id { font-size: 15px; font-weight: 600; font-family: monospace; color: #c4b5fd; }
+        .copy-btn {
+            background: rgba(167,139,250,0.2);
+            border: none;
+            border-radius: 8px;
+            color: #a78bfa;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: rgba(167,139,250,0.35); }
+        .pay-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            text-decoration: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(124,58,237,0.45);
+            margin-bottom: 16px;
+        }
+        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(124,58,237,0.6); }
+        .status { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 8px; min-height: 20px; }
+        .status.success { color: #4ade80; }
+        .divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
+        .note { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.6; }
+    </style>
 </head>
 <body>
-    <script>
-        const p = new URLSearchParams(window.location.search);
-        window.location.href = "upi://pay?pa=" + encodeURIComponent(p.get('pa')||'') + "&pn=" + encodeURIComponent(p.get('pn')||'') + "&am=" + encodeURIComponent(p.get('am')||'') + "&cu=INR";
-    </script>
-    <p>Opening your UPI app... If it doesn't open, please pay manually to UPI ID shown in the chat.</p>
+<div class="card">
+    <div class="logo">🏠</div>
+    <h1>Nestora Payment</h1>
+    <p class="subtitle" id="payee-name">Pay to Nestora</p>
+
+    <div class="amount-box">
+        <div class="amount-label">Amount to Pay</div>
+        <div class="amount" id="amount-display">₹0.00</div>
+    </div>
+
+    <div class="upi-box">
+        <div>
+            <div class="upi-label">UPI ID</div>
+            <div class="upi-id" id="upi-id-display">-</div>
+        </div>
+        <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
+    </div>
+
+    <a class="pay-btn" id="pay-link" href="#">
+        💳 Open UPI App to Pay
+    </a>
+
+    <div class="status" id="status-msg"></div>
+
+    <hr class="divider">
+    <p class="note">
+        This will open Google Pay, PhonePe, Paytm, or any installed UPI app.<br><br>
+        After paying, <strong>take a screenshot</strong> and upload it in the Nestora bot chat to confirm your payment.
+    </p>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const pa = params.get('pa') || 'nestora@upi';
+    const pn = params.get('pn') || 'Nestora';
+    const am = params.get('am') || '0.00';
+    const cu = params.get('cu') || 'INR';
+
+    // Update UI
+    document.getElementById('upi-id-display').textContent = pa;
+    document.getElementById('amount-display').textContent = '₹' + parseFloat(am).toFixed(2);
+    document.getElementById('payee-name').textContent = 'Pay to ' + pn;
+
+    // Build UPI deep link
+    const upiLink = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
+    document.getElementById('pay-link').href = upiLink;
+
+    // Auto-redirect on mobile
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) {
+        document.getElementById('status-msg').textContent = '🔄 Opening your UPI app...';
+        setTimeout(() => {
+            window.location.href = upiLink;
+            setTimeout(() => {
+                document.getElementById('status-msg').textContent = 'If the app did not open, tap the button above.';
+            }, 2000);
+        }, 500);
+    } else {
+        document.getElementById('status-msg').textContent = '📱 Open this link on your mobile to pay via UPI.';
+    }
+
+    function copyUPI() {
+        navigator.clipboard.writeText(pa).then(() => {
+            document.getElementById('status-msg').textContent = '✅ UPI ID copied!';
+            document.getElementById('status-msg').className = 'status success';
+            setTimeout(() => {
+                document.getElementById('status-msg').textContent = '';
+                document.getElementById('status-msg').className = 'status';
+            }, 2000);
+        });
+    }
+</script>
 </body>
 </html>
