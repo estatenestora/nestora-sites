@@ -162,7 +162,6 @@
         <div class="status" id="phone-copy-status"></div>
     </div>
 
-    <div class="status" id="status-msg"></div>
 
     <p class="note">
         Tap a button to open Google Pay, PhonePe, Paytm or any UPI app.<br>
@@ -184,7 +183,7 @@
     document.getElementById('amount-display').textContent   = '₹' + parseFloat(am).toFixed(2);
     document.getElementById('payee-name').textContent       = 'Pay to ' + pn;
 
-    // UPI deep links
+    // Build UPI deep links — only triggered when user taps a button
     const upiLinkById    = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
     const phoneVPA       = phone ? phone : pa;
     const upiLinkByPhone = `upi://pay?pa=${encodeURIComponent(phoneVPA)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
@@ -192,26 +191,12 @@
     document.getElementById('pay-link-id').href    = upiLinkById;
     document.getElementById('pay-link-phone').href = upiLinkByPhone;
 
-    // Hide phone option if not provided
+    // Hide phone option if no phone param passed
     if (!phone) {
-        document.querySelector('.divider-text').style.display = 'none';
-        document.querySelectorAll('.option-label')[1].style.display = 'none';
-        document.querySelectorAll('.pay-option')[1].style.display = 'none';
-        document.querySelectorAll('.option-label')[0].style.display = 'none';
-    }
-
-    // Auto-redirect on mobile (to UPI ID by default)
-    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-    if (isMobile) {
-        document.getElementById('status-msg').textContent = '🔄 Auto-opening your UPI app...';
-        setTimeout(() => {
-            window.location.href = upiLinkById;
-            setTimeout(() => {
-                document.getElementById('status-msg').textContent = 'If UPI app did not open, tap a button above.';
-            }, 2000);
-        }, 800);
-    } else {
-        document.getElementById('status-msg').textContent = '📱 Open this link on your mobile to pay via UPI.';
+        document.querySelector('.divider-text').style.display            = 'none';
+        document.querySelectorAll('.option-label')[1].style.display      = 'none';
+        document.querySelectorAll('.pay-option')[1].style.display        = 'none';
+        document.querySelectorAll('.option-label')[0].style.display      = 'none';
     }
 
     function copyText(elementId, statusId) {
