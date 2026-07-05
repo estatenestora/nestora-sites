@@ -14,72 +14,117 @@
             align-items: center;
             justify-content: center;
             color: white;
+            padding: 20px;
         }
         .card {
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 24px;
-            padding: 40px 32px;
-            max-width: 380px;
-            width: 90%;
+            padding: 36px 28px;
+            max-width: 400px;
+            width: 100%;
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.4);
         }
-        .logo { font-size: 48px; margin-bottom: 12px; }
-        h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
-        .subtitle { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 28px; }
+        .logo { font-size: 44px; margin-bottom: 10px; }
+        h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 24px; }
         .amount-box {
             background: rgba(255,255,255,0.1);
             border-radius: 16px;
-            padding: 20px;
+            padding: 18px;
             margin-bottom: 24px;
         }
-        .amount-label { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .amount { font-size: 40px; font-weight: 800; color: #a78bfa; }
-        .upi-box {
+        .amount-label { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .amount { font-size: 38px; font-weight: 800; color: #a78bfa; }
+
+        .divider-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 4px 0 16px;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .divider-text::before, .divider-text::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .option-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .pay-option {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 28px;
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        .option-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin-bottom: 10px;
         }
-        .upi-label { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-        .upi-id { font-size: 15px; font-weight: 600; font-family: monospace; color: #c4b5fd; }
+        .option-value {
+            font-size: 15px;
+            font-weight: 600;
+            font-family: monospace;
+            color: #c4b5fd;
+        }
         .copy-btn {
-            background: rgba(167,139,250,0.2);
+            background: rgba(167,139,250,0.15);
             border: none;
             border-radius: 8px;
             color: #a78bfa;
-            padding: 6px 10px;
+            padding: 5px 9px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
-        .copy-btn:hover { background: rgba(167,139,250,0.35); }
+        .copy-btn:hover { background: rgba(167,139,250,0.3); }
         .pay-btn {
             display: block;
             width: 100%;
             background: linear-gradient(135deg, #7c3aed, #a855f7);
             color: white;
             text-decoration: none;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 17px;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 700;
-            letter-spacing: 0.3px;
             transition: all 0.3s;
-            box-shadow: 0 8px 25px rgba(124,58,237,0.45);
-            margin-bottom: 16px;
+            box-shadow: 0 6px 20px rgba(124,58,237,0.4);
         }
-        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(124,58,237,0.6); }
-        .status { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 8px; min-height: 20px; }
+        .pay-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 25px rgba(124,58,237,0.55); }
+        .pay-btn.secondary {
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+            box-shadow: 0 6px 20px rgba(14,165,233,0.35);
+        }
+        .pay-btn.secondary:hover { box-shadow: 0 10px 25px rgba(14,165,233,0.5); }
+
+        .status { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 16px; min-height: 18px; }
         .status.success { color: #4ade80; }
-        .divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
-        .note { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.6; }
+        .note {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            line-height: 1.7;
+            margin-top: 18px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 16px;
+        }
     </style>
 </head>
 <body>
@@ -93,65 +138,89 @@
         <div class="amount" id="amount-display">₹0.00</div>
     </div>
 
-    <div class="upi-box">
-        <div>
-            <div class="upi-label">UPI ID</div>
-            <div class="upi-id" id="upi-id-display">-</div>
+    <!-- Option 1: UPI ID -->
+    <div class="option-label">Option 1 — Pay via UPI ID</div>
+    <div class="pay-option">
+        <div class="option-row">
+            <span class="option-value" id="upi-id-display">-</span>
+            <button class="copy-btn" onclick="copyText('upi-id-display', 'upi-copy-status')" title="Copy UPI ID">📋</button>
         </div>
-        <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
+        <a class="pay-btn" id="pay-link-id" href="#">💳 Pay with UPI ID</a>
+        <div class="status" id="upi-copy-status"></div>
     </div>
 
-    <a class="pay-btn" id="pay-link" href="#">
-        💳 Open UPI App to Pay
-    </a>
+    <div class="divider-text">or</div>
+
+    <!-- Option 2: Phone Number -->
+    <div class="option-label">Option 2 — Pay via Phone Number</div>
+    <div class="pay-option">
+        <div class="option-row">
+            <span class="option-value" id="phone-display">-</span>
+            <button class="copy-btn" onclick="copyText('phone-display', 'phone-copy-status')" title="Copy Phone">📋</button>
+        </div>
+        <a class="pay-btn secondary" id="pay-link-phone" href="#">📞 Pay with Phone Number</a>
+        <div class="status" id="phone-copy-status"></div>
+    </div>
 
     <div class="status" id="status-msg"></div>
 
-    <hr class="divider">
     <p class="note">
-        This will open Google Pay, PhonePe, Paytm, or any installed UPI app.<br><br>
-        After paying, <strong>take a screenshot</strong> and upload it in the Nestora bot chat to confirm your payment.
+        Tap a button to open Google Pay, PhonePe, Paytm or any UPI app.<br>
+        After paying, <strong>take a screenshot</strong> and send it in the Nestora bot chat to confirm payment.
     </p>
 </div>
 
 <script>
     const params = new URLSearchParams(window.location.search);
-    const pa = params.get('pa') || 'nestora@upi';
-    const pn = params.get('pn') || 'Nestora';
-    const am = params.get('am') || '0.00';
-    const cu = params.get('cu') || 'INR';
+    const pa    = params.get('pa')    || 'nestora@upi';
+    const phone = params.get('phone') || '';
+    const pn    = params.get('pn')    || 'Nestora';
+    const am    = params.get('am')    || '0.00';
+    const cu    = params.get('cu')    || 'INR';
 
     // Update UI
-    document.getElementById('upi-id-display').textContent = pa;
-    document.getElementById('amount-display').textContent = '₹' + parseFloat(am).toFixed(2);
-    document.getElementById('payee-name').textContent = 'Pay to ' + pn;
+    document.getElementById('upi-id-display').textContent  = pa;
+    document.getElementById('phone-display').textContent    = phone || pa;
+    document.getElementById('amount-display').textContent   = '₹' + parseFloat(am).toFixed(2);
+    document.getElementById('payee-name').textContent       = 'Pay to ' + pn;
 
-    // Build UPI deep link
-    const upiLink = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
-    document.getElementById('pay-link').href = upiLink;
+    // UPI deep links
+    const upiLinkById    = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
+    const phoneVPA       = phone ? phone : pa;
+    const upiLinkByPhone = `upi://pay?pa=${encodeURIComponent(phoneVPA)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
 
-    // Auto-redirect on mobile
+    document.getElementById('pay-link-id').href    = upiLinkById;
+    document.getElementById('pay-link-phone').href = upiLinkByPhone;
+
+    // Hide phone option if not provided
+    if (!phone) {
+        document.querySelector('.divider-text').style.display = 'none';
+        document.querySelectorAll('.option-label')[1].style.display = 'none';
+        document.querySelectorAll('.pay-option')[1].style.display = 'none';
+        document.querySelectorAll('.option-label')[0].style.display = 'none';
+    }
+
+    // Auto-redirect on mobile (to UPI ID by default)
     const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
     if (isMobile) {
-        document.getElementById('status-msg').textContent = '🔄 Opening your UPI app...';
+        document.getElementById('status-msg').textContent = '🔄 Auto-opening your UPI app...';
         setTimeout(() => {
-            window.location.href = upiLink;
+            window.location.href = upiLinkById;
             setTimeout(() => {
-                document.getElementById('status-msg').textContent = 'If the app did not open, tap the button above.';
+                document.getElementById('status-msg').textContent = 'If UPI app did not open, tap a button above.';
             }, 2000);
-        }, 500);
+        }, 800);
     } else {
         document.getElementById('status-msg').textContent = '📱 Open this link on your mobile to pay via UPI.';
     }
 
-    function copyUPI() {
-        navigator.clipboard.writeText(pa).then(() => {
-            document.getElementById('status-msg').textContent = '✅ UPI ID copied!';
-            document.getElementById('status-msg').className = 'status success';
-            setTimeout(() => {
-                document.getElementById('status-msg').textContent = '';
-                document.getElementById('status-msg').className = 'status';
-            }, 2000);
+    function copyText(elementId, statusId) {
+        const text = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const el = document.getElementById(statusId);
+            el.textContent = '✅ Copied!';
+            el.className = 'status success';
+            setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 2000);
         });
     }
 </script>
