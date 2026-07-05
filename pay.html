@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nestora Pay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <script>
+        const p = new URLSearchParams(window.location.search);
+        window.location.href = "upi://pay?pa=" + encodeURIComponent(p.get('pa')||'') + "&pn=" + encodeURIComponent(p.get('pn')||'') + "&am=" + encodeURIComponent(p.get('am')||'') + "&cu=INR";
+    </script>
+    <p>Opening your UPI app... If it doesn't open, please pay manually to UPI ID shown in the chat.</p>
+</body>
+</html>
