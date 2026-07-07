@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nestora - Pay via UPI</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
@@ -16,75 +22,109 @@
             color: white;
             padding: 20px;
         }
+
         .card {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 24px;
             padding: 36px 28px;
             max-width: 400px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
         }
-        .logo { font-size: 44px; margin-bottom: 10px; }
-        h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-        .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 24px; }
+
+        .logo {
+            font-size: 44px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
         .amount-box {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 18px;
             margin-bottom: 24px;
         }
-        .amount-label { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .amount { font-size: 38px; font-weight: 800; color: #a78bfa; }
+
+        .amount-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .amount {
+            font-size: 38px;
+            font-weight: 800;
+            color: #a78bfa;
+        }
 
         .divider-text {
             display: flex;
             align-items: center;
             gap: 10px;
             margin: 4px 0 16px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .divider-text::before, .divider-text::after {
+
+        .divider-text::before,
+        .divider-text::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .option-label {
             font-size: 11px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
             letter-spacing: 1px;
             text-align: left;
             margin-bottom: 8px;
         }
+
         .pay-option {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 14px 16px;
             margin-bottom: 12px;
         }
+
         .option-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 10px;
         }
+
         .option-value {
             font-size: 15px;
             font-weight: 600;
             font-family: monospace;
             color: #c4b5fd;
         }
+
         .copy-btn {
-            background: rgba(167,139,250,0.15);
+            background: rgba(167, 139, 250, 0.15);
             border: none;
             border-radius: 8px;
             color: #a78bfa;
@@ -94,7 +134,11 @@
             transition: all 0.2s;
             flex-shrink: 0;
         }
-        .copy-btn:hover { background: rgba(167,139,250,0.3); }
+
+        .copy-btn:hover {
+            background: rgba(167, 139, 250, 0.3);
+        }
+
         .pay-btn {
             display: block;
             width: 100%;
@@ -106,107 +150,250 @@
             font-size: 15px;
             font-weight: 700;
             transition: all 0.3s;
-            box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            cursor: pointer;
+            border: none;
         }
-        .pay-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 25px rgba(124,58,237,0.55); }
+
+        .pay-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.55);
+        }
+
         .pay-btn.secondary {
             background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-            box-shadow: 0 6px 20px rgba(14,165,233,0.35);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
         }
-        .pay-btn.secondary:hover { box-shadow: 0 10px 25px rgba(14,165,233,0.5); }
 
-        .status { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 16px; min-height: 18px; }
-        .status.success { color: #4ade80; }
+        .pay-btn.secondary:hover {
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.5);
+        }
+
+        .status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        .status.success {
+            color: #4ade80;
+        }
+
         .note {
             font-size: 11px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             line-height: 1.7;
             margin-top: 18px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             padding-top: 16px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 100;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .confirm-card {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 24px;
+            padding: 32px 24px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .confirm-icon {
+            font-size: 52px;
+            margin-bottom: 12px;
+        }
+
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .confirm-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .confirm-yes {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            transition: all 0.25s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .confirm-yes:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.55);
+        }
+
+        .confirm-no {
+            display: block;
+            width: 100%;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .confirm-no:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .confirm-retry {
+            display: block;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 13px;
+            padding: 8px;
+            cursor: pointer;
         }
     </style>
 </head>
+
 <body>
-<div class="card">
-    <div class="logo">🏠</div>
-    <h1>Nestora Payment</h1>
-    <p class="subtitle" id="payee-name">Pay to Nestora</p>
-
-    <div class="amount-box">
-        <div class="amount-label">Amount to Pay</div>
-        <div class="amount" id="amount-display">₹0.00</div>
-    </div>
-
-    <!-- Option 1: UPI ID -->
-    <div class="option-label">Option 1 — Pay via UPI ID</div>
-    <div class="pay-option">
-        <div class="option-row">
-            <span class="option-value" id="upi-id-display">-</span>
-            <button class="copy-btn" onclick="copyText('upi-id-display', 'upi-copy-status')" title="Copy UPI ID">📋</button>
+    <div class="card" id="pay-screen">
+        <div class="logo">🏠</div>
+        <h1>Nestora Payment</h1>
+        <p class="subtitle" id="payee-name">Pay to Nestora</p>
+        <div class="amount-box">
+            <div class="amount-label">Amount to Pay</div>
+            <div class="amount" id="amount-display">₹0.00</div>
         </div>
-        <a class="pay-btn" id="pay-link-id" href="#">💳 Pay with UPI ID</a>
-        <div class="status" id="upi-copy-status"></div>
-    </div>
-
-    <div class="divider-text">or</div>
-
-    <!-- Option 2: Phone Number -->
-    <div class="option-label">Option 2 — Pay via Phone Number</div>
-    <div class="pay-option">
-        <div class="option-row">
-            <span class="option-value" id="phone-display">-</span>
-            <button class="copy-btn" onclick="copyText('phone-display', 'phone-copy-status')" title="Copy Phone">📋</button>
+        <div class="option-label">Option 1 — Pay via UPI ID</div>
+        <div class="pay-option">
+            <div class="option-row">
+                <span class="option-value" id="upi-id-display">-</span>
+                <button class="copy-btn" onclick="copyText('upi-id-display', 'upi-copy-status')"
+                    title="Copy UPI ID">📋</button>
+            </div>
+            <button class="pay-btn" onclick="handlePayTap('id')">💳 Pay with UPI ID</button>
+            <div class="status" id="upi-copy-status"></div>
         </div>
-        <a class="pay-btn secondary" id="pay-link-phone" href="#">📞 Pay with Phone Number</a>
-        <div class="status" id="phone-copy-status"></div>
+        <div class="divider-text" id="divider">or</div>
+        <div class="option-label" id="phone-label">Option 2 — Pay via Phone Number</div>
+        <div class="pay-option" id="phone-option">
+            <div class="option-row">
+                <span class="option-value" id="phone-display">-</span>
+                <button class="copy-btn" onclick="copyText('phone-display', 'phone-copy-status')"
+                    title="Copy Phone">📋</button>
+            </div>
+            <button class="pay-btn secondary" onclick="handlePayTap('phone')">📞 Pay with Phone Number</button>
+            <div class="status" id="phone-copy-status"></div>
+        </div>
+        <p class="note">
+            Tap a button to open Google Pay, PhonePe, Paytm or any UPI app.<br>
+            After paying, <strong>confirm your payment</strong> in the next step so Nestora is notified automatically.
+        </p>
     </div>
+    <div class="overlay" id="confirm-overlay">
+        <div class="confirm-card">
+            <div class="confirm-icon">💸</div>
+            <div class="confirm-title">Payment Sent?</div>
+            <div class="confirm-sub">
+                Did your UPI app show a success message?<br>
+                Please confirm so Nestora can notify the admin automatically.
+            </div>
+            <button class="confirm-yes" id="confirm-yes-btn">✅ Yes, I Paid Successfully</button>
+            <button class="confirm-no" onclick="closeOverlay()">❌ No, Payment Failed — Try Again</button>
+            <button class="confirm-retry" onclick="closeOverlay()">🔄 Go back to payment options</button>
+        </div>
+    </div>
+    <script>
+        var params = new URLSearchParams(window.location.search);
+        var pa = params.get('pa') || 'nestora@upi';
+        var phone = params.get('phone') || '';
+        var pn = params.get('pn') || 'Nestora';
+        var am = params.get('am') || '0.00';
+        var cu = params.get('cu') || 'INR';
+        var botUsername = params.get('bot') || '';
+        var bookingId = params.get('booking_id') || '';
 
-    <p class="note">
-        Tap a button to open Google Pay, PhonePe, Paytm or any UPI app.<br>
-        After paying, <strong>take a screenshot</strong> and send it in the Nestora bot chat to confirm payment.
-    </p>
-</div>
+        document.getElementById('upi-id-display').textContent = pa;
+        document.getElementById('phone-display').textContent = phone || pa;
+        document.getElementById('amount-display').textContent = '\u20b9' + parseFloat(am).toFixed(2);
+        document.getElementById('payee-name').textContent = 'Pay to ' + pn;
 
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const pa    = params.get('pa')    || 'nestora@upi';
-    const phone = params.get('phone') || '';
-    const pn    = params.get('pn')    || 'Nestora';
-    const am    = params.get('am')    || '0.00';
-    const cu    = params.get('cu')    || 'INR';
+        var upiLinkById = 'upi://pay?pa=' + encodeURIComponent(pa) + '&pn=' + encodeURIComponent(pn) + '&am=' + encodeURIComponent(am) + '&cu=' + cu;
+        var phoneVPA = phone ? phone : pa;
+        var upiLinkByPhone = 'upi://pay?pa=' + encodeURIComponent(phoneVPA) + '&pn=' + encodeURIComponent(pn) + '&am=' + encodeURIComponent(am) + '&cu=' + cu;
 
-    // Update UI
-    document.getElementById('upi-id-display').textContent  = pa;
-    document.getElementById('phone-display').textContent    = phone || pa;
-    document.getElementById('amount-display').textContent   = '₹' + parseFloat(am).toFixed(2);
-    document.getElementById('payee-name').textContent       = 'Pay to ' + pn;
+        var confirmLink = botUsername ? ('https://t.me/' + botUsername) : '#';
+        if (botUsername && bookingId) { confirmLink = 'https://t.me/' + botUsername + '?start=pay_ok_' + bookingId; }
+        document.getElementById('confirm-yes-btn').onclick = function () { window.location.href = confirmLink; };
 
-    // Build UPI deep links — only triggered when user taps a button
-    const upiLinkById    = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
-    const phoneVPA       = phone ? phone : pa;
-    const upiLinkByPhone = `upi://pay?pa=${encodeURIComponent(phoneVPA)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=${cu}`;
+        if (!phone) {
+            document.getElementById('divider').style.display = 'none';
+            document.getElementById('phone-label').style.display = 'none';
+            document.getElementById('phone-option').style.display = 'none';
+        }
 
-    document.getElementById('pay-link-id').href    = upiLinkById;
-    document.getElementById('pay-link-phone').href = upiLinkByPhone;
-
-    // Hide phone option if no phone param passed
-    if (!phone) {
-        document.querySelector('.divider-text').style.display            = 'none';
-        document.querySelectorAll('.option-label')[1].style.display      = 'none';
-        document.querySelectorAll('.pay-option')[1].style.display        = 'none';
-        document.querySelectorAll('.option-label')[0].style.display      = 'none';
-    }
-
-    function copyText(elementId, statusId) {
-        const text = document.getElementById(elementId).textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            const el = document.getElementById(statusId);
-            el.textContent = '✅ Copied!';
-            el.className = 'status success';
-            setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 2000);
-        });
-    }
-</script>
+        function handlePayTap(type) {
+            var link = type === 'phone' ? upiLinkByPhone : upiLinkById;
+            window.location.href = link;
+            setTimeout(function () { document.getElementById('confirm-overlay').classList.add('active'); }, 1500);
+        }
+        function closeOverlay() { document.getElementById('confirm-overlay').classList.remove('active'); }
+        function copyText(elementId, statusId) {
+            var text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(function () {
+                var el = document.getElementById(statusId);
+                el.textContent = '\u2705 Copied!';
+                el.className = 'status success';
+                setTimeout(function () { el.textContent = ''; el.className = 'status'; }, 2000);
+            });
+        }
+    </script>
 </body>
+
 </html>
