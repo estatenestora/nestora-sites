@@ -344,7 +344,7 @@
                 Did your UPI app show a success message?<br>
                 Please confirm so Nestora can notify the admin automatically.
             </div>
-            <button class="confirm-yes" id="confirm-yes-btn">✅ Yes, I Paid Successfully</button>
+            <a class="confirm-yes" id="confirm-yes-btn" href="#">✅ Yes, I Paid Successfully</a>
             <button class="confirm-no" onclick="closeOverlay()">❌ No, Payment Failed — Try Again</button>
             <button class="confirm-retry" onclick="closeOverlay()">🔄 Go back to payment options</button>
         </div>
@@ -356,7 +356,7 @@
         var pn = params.get('pn') || 'Nestora';
         var am = params.get('am') || '0.00';
         var cu = params.get('cu') || 'INR';
-        var botUsername = params.get('bot') || '';
+        var botUsername = params.get('bot') || 'nestora_ai_dev1_bot'; // fallback default
         var bookingId = params.get('booking_id') || '';
 
         document.getElementById('upi-id-display').textContent = pa;
@@ -368,9 +368,11 @@
         var phoneVPA = phone ? phone : pa;
         var upiLinkByPhone = 'upi://pay?pa=' + encodeURIComponent(phoneVPA) + '&pn=' + encodeURIComponent(pn) + '&am=' + encodeURIComponent(am) + '&cu=' + cu;
 
-        var confirmLink = botUsername ? ('https://t.me/' + botUsername) : '#';
-        if (botUsername && bookingId) { confirmLink = 'https://t.me/' + botUsername + '?start=pay_ok_' + bookingId; }
-        document.getElementById('confirm-yes-btn').onclick = function () { window.location.href = confirmLink; };
+        var confirmLink = 'https://t.me/' + botUsername;
+        if (bookingId) {
+            confirmLink = 'https://t.me/' + botUsername + '?start=pay_ok_' + bookingId;
+        }
+        document.getElementById('confirm-yes-btn').href = confirmLink;
 
         if (!phone) {
             document.getElementById('divider').style.display = 'none';
