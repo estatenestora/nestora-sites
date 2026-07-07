@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nestora - Pay via UPI</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -349,52 +350,86 @@
             <button class="confirm-retry" onclick="closeOverlay()">🔄 Go back to payment options</button>
         </div>
     </div>
-    <script>
-        var params = new URLSearchParams(window.location.search);
-        var pa = params.get('pa') || 'nestora@upi';
-        var phone = params.get('phone') || '';
-        var pn = params.get('pn') || 'Nestora';
-        var am = params.get('am') || '0.00';
-        var cu = params.get('cu') || 'INR';
-        var botUsername = params.get('bot') || 'nestora_ai_dev1_bot'; // fallback default
-        var bookingId = params.get('booking_id') || '';
+    // Initialize Telegram WebApp if opened inside Telegram in-app browser/web view
+    if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+    }
 
-        document.getElementById('upi-id-display').textContent = pa;
-        document.getElementById('phone-display').textContent = phone || pa;
-        document.getElementById('amount-display').textContent = '\u20b9' + parseFloat(am).toFixed(2);
-        document.getElementById('payee-name').textContent = 'Pay to ' + pn;
+    var params = new URLSearchParams(window.location.search);
+    var pa = params.get('pa') || 'nestora@upi';
+    var phone = params.get('phone') || '';
+    var pn = params.get('pn') || 'Nestora';
+    var am = params.get('am') || '0.00';
+    var cu = params.get('cu') || 'INR';
+    var botUsername = params.get('bot') || 'nestora_ai_dev1_bot'; // fallback default
+    var bookingId = params.get('booking_id') || '';
 
-        var upiLinkById = 'upi://pay?pa=' + encodeURIComponent(pa) + '&pn=' + encodeURIComponent(pn) + '&am=' + encodeURIComponent(am) + '&cu=' + cu;
-        var phoneVPA = phone ? phone : pa;
-        var upiLinkByPhone = 'upi://pay?pa=' + encodeURIComponent(phoneVPA) + '&pn=' + encodeURIComponent(pn) + '&am=' + encodeURIComponent(am) + '&cu=' + cu;
+    document.getElementById('upi-id-display').textContent = pa;
+    document.getElementById('phone-display').textContent = phone || pa;
+    document.getElementById('amount-display').textContent = '\u20b9' + parseFloat(am).toFixed(2);
+    document.getElementById('payee-name').textContent = 'Pay to ' + pn;
 
-        var confirmLink = 'https://t.me/' + botUsername;
-        if (bookingId) {
-            confirmLink = 'https://t.me/' + botUsername + '?start=pay_ok_' + bookingId;
-        }
-        document.getElementById('confirm-yes-btn').href = confirmLink;
+    var upiLinkById = 'upi://pay?pa=' + encodeURIComponent(pa) + '&pn=' + encodeURIComponent(pn) + '&am=' +
+    encodeURIComponent(am) + '&cu=' + cu;
+    var phoneVPA = phone ? phone : pa;
+    var upiLinkByPhone = 'upi://pay?pa=' + encodeURIComponent(phoneVPA) + '&pn=' + encodeURIComponent(pn) + '&am=' +
+    encodeURIComponent(am) + '&cu=' + cu;
 
-        if (!phone) {
-            document.getElementById('divider').style.display = 'none';
-            document.getElementById('phone-label').style.display = 'none';
-            document.getElementById('phone-option').style.display = 'none';
-        }
+    var confirmLink = 'https://t.me/' + botUsername;
+    if (bookingId) {
+    confirmLink = 'https://t.me/' + botUsername + '?start=pay_ok_' + bookingId;
+    }
+    document.getElementById('confirm-yes-btn').href = confirmLink;
 
-        function handlePayTap(type) {
-            var link = type === 'phone' ? upiLinkByPhone : upiLinkById;
-            window.location.href = link;
-            setTimeout(function () { document.getElementById('confirm-overlay').classList.add('active'); }, 1500);
-        }
-        function closeOverlay() { document.getElementById('confirm-overlay').classList.remove('active'); }
-        function copyText(elementId, statusId) {
-            var text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(function () {
-                var el = document.getElementById(statusId);
-                el.textContent = '\u2705 Copied!';
-                el.className = 'status success';
-                setTimeout(function () { el.textContent = ''; el.className = 'status'; }, 2000);
-            });
-        }
+    if (!phone) {
+    document.getElementById('divider').style.display = 'none';
+    document.getElementById('phone-label').style.display = 'none';
+    document.getElementById('phone-option').style.display = 'none';
+    }
+
+    // Triggered when user clicks a payment option
+    function handlePayTap(type) {
+    var link = type === 'phone' ? upiLinkByPhone : upiLinkById;
+
+    // Store flag that payment flow was opened
+    localStorage.setItem('payment_launched', 'true');
+
+    // Redirect to UPI app
+    window.location.href = link;
+    }
+
+    // Detect when the user switches back from the UPI app
+    function checkReturnAndShowOverlay() {
+    if (localStorage.getItem('payment_launched') === 'true') {
+    document.getElementById('confirm-overlay').classList.add('active');
+    localStorage.removeItem('payment_launched');
+    }
+    }
+
+    document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+    checkReturnAndShowOverlay();
+    }
+    });
+
+    window.addEventListener('focus', function() {
+    setTimeout(checkReturnAndShowOverlay, 600); // slight delay to allow focus transition
+    });
+
+    function closeOverlay() {
+    document.getElementById('confirm-overlay').classList.remove('active');
+    }
+
+    function copyText(elementId, statusId) {
+    var text = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(text).then(function() {
+    var el = document.getElementById(statusId);
+    el.textContent = '\u2705 Copied!';
+    el.className = 'status success';
+    setTimeout(function() { el.textContent = ''; el.className = 'status'; }, 2000);
+    });
+    }
     </script>
 </body>
 
