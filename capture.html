@@ -208,6 +208,7 @@
 
         /* Switch camera */
         .switch-btn {
+            display: none !important;
             width: 52px;
             height: 52px;
             border-radius: 50%;
@@ -379,15 +380,13 @@
 
         /* ─────────────────── STATE ─────────────────── */
         let stream = null;
-        let devices = [];      // VideoInputDevice[]
-        let devIdx = 0;
         let capturedBlob = null;
         let isSubmitting = false;
 
         /* ─────────────────── INIT ─────────────────── */
         (async function init() {
             applyMode();
-            await startStream(true); // Start stream first, permissions are granted automatically
+            await startStream();
         })();
 
         /* ─────────────────── MODE SETUP ─────────────────── */
@@ -396,7 +395,7 @@
 
             if (MODE === 'aadhaar') {
                 ttl.textContent = 'Aadhaar Card Upload';
-                sub.textContent = 'Place your Aadhaar card flat inside the blue frame. Use the rear camera for best results.';
+                sub.textContent = 'Place your Aadhaar card flat inside the blue frame. Using rear camera.';
                 frameOver.innerHTML = '<div class="frame-rect"></div>';
                 frameLabel.textContent = 'Aadhaar Card Front';
             } else if (MODE === 'selfie') {
@@ -412,83 +411,39 @@
             }
         }
 
-        /* ─────────────────── CAMERA DEVICES ─────────────────── */
-        async function buildDeviceList() {
-            try {
-                const all = await navigator.mediaDevices.enumerateDevices();
-                devices = all.filter(d => d.kind === 'videoinput');
-            } catch (e) {
-                devices = [];
-            }
-
-            if (devices.length > 1) {
-                switchBtn.classList.remove('hidden');
-
-                // Determine active device index
-                const activeTrack = stream ? stream.getVideoTracks()[0] : null;
-                const activeSettings = activeTrack ? activeTrack.getSettings() : null;
-                const activeDeviceId = activeSettings ? activeSettings.deviceId : '';
-
-                if (activeDeviceId) {
-                    const idx = devices.findIndex(d => d.deviceId === activeDeviceId);
-                    if (idx !== -1) {
-                        devIdx = idx;
-                    }
-                }
-            } else {
-                // If 1 or 0 enumerated devices (common sandbox restriction in WebViews),
-                // we still show the switch button on mobile devices so we can toggle facingMode
-                const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                if (isMobile) {
-                    switchBtn.classList.remove('hidden');
-                } else {
-                    switchBtn.classList.add('hidden');
-                }
-            }
-        }
-
         /* ─────────────────── STREAM ─────────────────── */
-        async function startStream(firstLoad = false) {
+        async function startStream() {
             stopStream();
-            if (!firstLoad) {
-                setStatus('Switching camera…', true);
-                // 150ms release delay to prevent crash/freeze in WebView containers
-                await new Promise(r => setTimeout(r, 150));
-            } else {
-                setStatus('Connecting to camera…', true);
-            }
+            setStatus('Connecting to camera…', true);
 
-            let constraints;
-            if (!firstLoad && devices.length > 0 && devices[devIdx] && devices[devIdx].deviceId) {
-                constraints = {
-                    video: {
-                        deviceId: { exact: devices[devIdx].deviceId },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    },
-                    audio: false
-                };
-            } else {
-                /* Preferred facingMode for first load / fallback */
-                const facing = MODE === 'aadhaar' ? 'environment' : 'user';
-                constraints = {
-                    video: {
-                        facingMode: facing,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    },
-                    audio: false
-                };
-            }
+            // Require environment (back) camera for Aadhaar card, user (front) for selfie/profile
+            const facing = MODE === 'aadhaar' ? 'environment' : 'user';
+            const constraints = {
+                video: {
+                    facingMode: facing,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                },
+                audio: false
+            };
 
             try {
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
             } catch (err) {
+                // Fallback constraint (try simple facingMode target)
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: facing },
+                        audio: false
+                    });
                 } catch (e2) {
-                    setStatus('❌ Camera access denied: ' + e2.message);
-                    return;
+                    // Final fallback to generic video access
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    } catch (e3) {
+                        setStatus('❌ Camera access denied: ' + e3.message);
+                        return;
+                    }
                 }
             }
 
@@ -500,13 +455,6 @@
             liveCtrls.style.display = 'flex';
             decCtrls.style.display = 'none';
             setStatus('', true);
-
-            // Once camera is active, query available devices (labels will be populated)
-            if (firstLoad) {
-                setTimeout(async () => {
-                    await buildDeviceList();
-                }, 300);
-            }
         }
 
         function stopStream() {
@@ -514,62 +462,6 @@
                 stream.getTracks().forEach(t => t.stop());
                 stream = null;
             }
-        }
-
-        /* ─────────────────── CAMERA SWITCH ─────────────────── */
-        let currentFacingMode = MODE === 'aadhaar' ? 'environment' : 'user';
-
-        async function switchCam() {
-            if (isSubmitting) return;
-            switchBtn.style.opacity = '0.5';
-
-            if (devices.length > 1) {
-                devIdx = (devIdx + 1) % devices.length;
-                await startStream(false);
-            } else {
-                // Toggle facingMode manually for devices with sandbox limitations
-                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-
-                stopStream();
-                setStatus('Switching camera…', true);
-                await new Promise(r => setTimeout(r, 150));
-
-                const constraints = {
-                    video: {
-                        facingMode: currentFacingMode,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    },
-                    audio: false
-                };
-
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia(constraints);
-                } catch (e) {
-                    try {
-                        const fallbackFacing = currentFacingMode === 'user' ? 'environment' : 'user';
-                        stream = await navigator.mediaDevices.getUserMedia({
-                            video: { facingMode: fallbackFacing },
-                            audio: false
-                        });
-                        currentFacingMode = fallbackFacing;
-                    } catch (e2) {
-                        setStatus('❌ Could not switch camera: ' + e2.message);
-                        switchBtn.style.opacity = '1';
-                        return;
-                    }
-                }
-
-                vid.srcObject = stream;
-                vid.style.display = 'block';
-                preview.style.display = 'none';
-                frameOver.style.display = 'flex';
-                frameLabel.style.display = 'block';
-                liveCtrls.style.display = 'flex';
-                decCtrls.style.display = 'none';
-                setStatus('', true);
-            }
-            switchBtn.style.opacity = '1';
         }
 
         /* ─────────────────── CAPTURE ─────────────────── */
