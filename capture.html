@@ -584,9 +584,9 @@
             spinEl.style.display = 'block';
             setStatus('📤 Uploading photo…', true);
 
-            let fileUrl;
+            let fileID;
             try {
-                fileUrl = await uploadToTmpfiles(capturedBlob);
+                fileID = await uploadToTmpfiles(capturedBlob);
             } catch (e) {
                 spinEl.style.display = 'none';
                 decCtrls.style.display = 'flex';
@@ -595,21 +595,40 @@
                 return;
             }
 
-            /* Build deep link: /start photo_MODE_ENCODEDURL */
-            const encoded = btoa(fileUrl).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-            const payload = `photo_${MODE}_${USER_ID}_${encoded}`;
+            /*
+             * Build the Telegram deep link payload.
+             * Format: photo_MODE_USERID_FILEID
+             * e.g.:   photo_aadhaar_123456789_9876543
+             *
+             * Telegram /start parameter limit = 64 chars (A-Z a-z 0-9 _ -)
+             * "photo_aadhaar_" (14) + USER_ID (≤10) + "_" (1) + fileID (≤9) ≤ 34 chars  ✓
+             */
+            const payload = `photo_${MODE}_${USER_ID}_${fileID}`;
+
+            if (payload.length > 64) {
+                spinEl.style.display = 'none';
+                decCtrls.style.display = 'flex';
+                isSubmitting = false;
+                setStatus('❌ Payload too long (' + payload.length + ' chars). Contact support.');
+                return;
+            }
+
             const botLink = `https://t.me/${BOT}?start=${payload}`;
 
-            setStatus('✅ Done! Redirecting to Nestora bot…', true);
+            setStatus('✅ Photo uploaded! Sending to Nestora bot…', true);
             statusEl.className = 'status ok';
 
             /* Wait a moment so user sees the success message, then redirect */
             setTimeout(() => {
                 window.location.href = botLink;
-            }, 1200);
+            }, 1000);
         }
 
         /* ─────────────────── UPLOAD ─────────────────── */
+        /**
+         * Uploads blob to tmpfiles.org and returns the numeric file ID string.
+         * e.g. for https://tmpfiles.org/dl/1234567/capture.jpg → returns "1234567"
+         */
         async function uploadToTmpfiles(blob) {
             const fd = new FormData();
             fd.append('file', blob, 'capture.jpg');
@@ -621,8 +640,12 @@
             if (json.status !== 'success' || !json.data?.url)
                 throw new Error('Bad response from upload server');
 
-            /* Convert view URL → direct download URL */
-            return json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+            /* Extract the numeric ID from the view URL.
+               URL format: https://tmpfiles.org/1234567/capture.jpg */
+            const viewUrl = json.data.url;              // e.g. https://tmpfiles.org/1234567/capture.jpg
+            const match = viewUrl.match(/tmpfiles\.org\/([\w]+)\//i);
+            if (!match) throw new Error('Could not parse file ID from: ' + viewUrl);
+            return match[1];                            // returns "1234567"
         }
 
         /* ─────────────────── JPEG TIMESTAMP (liveness) ─────────────────── */
