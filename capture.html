@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nestora – Live Capture</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         *,
         *::before,
@@ -595,8 +596,21 @@
                 return;
             }
 
+            const downloadUrl = `https://tmpfiles.org/dl/${fileID}/capture.jpg`;
+
+            // If running inside Telegram WebApp, send data directly and close
+            if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.sendData === 'function') {
+                try {
+                    window.Telegram.WebApp.sendData(downloadUrl);
+                    window.Telegram.WebApp.close();
+                    return;
+                } catch (e) {
+                    console.error("Telegram WebApp sendData failed: ", e);
+                }
+            }
+
             /*
-             * Build the Telegram deep link payload.
+             * Build the Telegram deep link payload (fallback for external browsers).
              * Format: photo_MODE_USERID_FILEID
              * e.g.:   photo_aadhaar_123456789_9876543
              *
