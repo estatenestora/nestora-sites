@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nestora - Live Capture</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 32px 24px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .logo {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: white;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(167, 139, 250, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            margin-bottom: 24px;
+        }
+
+        video,
+        img#preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        img#preview {
+            display: none;
+        }
+
+        .overlay-guide {
+            position: absolute;
+            inset: 0;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            margin: 20px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .overlay-guide.selfie-mode {
+            border-radius: 50%;
+            aspect-ratio: 1/1;
+            margin: 20px auto;
+            width: 70%;
+            height: auto;
+            border: 2px dashed rgba(167, 139, 250, 0.6);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+        }
+
+        .overlay-guide.aadhaar-mode {
+            border: 2px dashed rgba(14, 165, 233, 0.6);
+            aspect-ratio: 1.586/1;
+            /* standard card ratio */
+            margin: auto 15px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+        }
+
+        .guide-text {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 16px;
+        }
+
+        .btn-circle {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .shutter-btn {
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2), 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .shutter-btn::after {
+            content: '';
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2px solid #0f0c29;
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .shutter-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .shutter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .shutter-btn:active::after {
+            background: rgba(124, 58, 237, 0.2);
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 20px;
+            width: 52px;
+            height: 52px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .decision-buttons {
+            display: none;
+            width: 100%;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .pay-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            cursor: pointer;
+            border: none;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.55);
+        }
+
+        .pay-btn.secondary {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+            box-shadow: none;
+        }
+
+        .pay-btn.secondary:hover {
+            background: rgba(239, 68, 68, 0.25);
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.15);
+        }
+
+        .status-message {
+            font-size: 13px;
+            color: #fca5a5;
+            margin-top: 12px;
+            min-height: 20px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #a78bfa;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0 {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="logo">🏠</div>
+        <h1 id="title-text">Live Photo Capture</h1>
+        <p class="subtitle" id="instruction-text">Please allow camera permissions to proceed.</p>
+
+        <div class="camera-container">
+            <video id="video" autoplay playsinline muted></video>
+            <img id="preview" alt="Preview">
+            <div class="overlay-guide" id="guide-frame">
+                <div class="guide-text" id="guide-text">Align within frame</div>
+            </div>
+        </div>
+
+        <div class="spinner" id="spinner"></div>
+
+        <div class="controls" id="camera-controls">
+            <!-- Blank placeholder to balance layout -->
+            <div style="width: 52px;"></div>
+            <button class="btn-circle shutter-btn" id="shutter" onclick="capturePhoto()" title="Capture Photo"></button>
+            <button class="btn-circle action-btn" id="switch-camera" onclick="switchCamera()"
+                title="Switch Camera">🔄</button>
+        </div>
+
+        <div class="decision-buttons" id="decision-controls">
+            <button class="pay-btn secondary" onclick="retakePhoto()">🔄 Retake</button>
+            <button class="pay-btn" onclick="confirmAndSubmit()">✅ Confirm & Submit</button>
+        </div>
+
+        <div class="status-message" id="status"></div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        const video = document.getElementById('video');
+        const preview = document.getElementById('preview');
+        const guideFrame = document.getElementById('guide-frame');
+        const guideTextElement = document.getElementById('guide-text');
+        const cameraControls = document.getElementById('camera-controls');
+        const decisionControls = document.getElementById('decision-controls');
+        const statusDiv = document.getElementById('status');
+        const spinner = document.getElementById('spinner');
+        const titleText = document.getElementById('title-text');
+        const instructionText = document.getElementById('instruction-text');
+
+        // Parse query params
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode') || 'selfie'; // selfie, aadhaar, profile
+
+        let currentStream = null;
+        let facingMode = mode === 'aadhaar' ? 'environment' : 'user';
+        let capturedBase64 = null;
+
+        // Apply UI configurations based on mode
+        function applyModeSettings() {
+            if (mode === 'aadhaar') {
+                titleText.textContent = "Aadhaar Card Upload";
+                instructionText.textContent = "Align your Aadhaar Card (front side) flat inside the frame and capture in clear lighting.";
+                guideFrame.className = "overlay-guide aadhaar-mode";
+                guideTextElement.textContent = "Aadhaar Card Front";
+            } else if (mode === 'selfie') {
+                titleText.textContent = "Live Selfie Capture";
+                instructionText.textContent = "Look directly at the front camera. Keep your face centered within the frame.";
+                guideFrame.className = "overlay-guide selfie-mode";
+                guideTextElement.textContent = "Center Face Here";
+            } else if (mode === 'profile') {
+                titleText.textContent = "Profile Picture Capture";
+                instructionText.textContent = "Look directly at the camera and snap a fresh photo for your profile.";
+                guideFrame.className = "overlay-guide selfie-mode";
+                guideTextElement.textContent = "Center Face Here";
+            }
+        }
+
+        // Start video stream
+        async function startCamera() {
+            stopCamera();
+            statusDiv.textContent = "";
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    },
+                    audio: false
+                };
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+                video.style.display = 'block';
+                preview.style.display = 'none';
+                guideFrame.style.display = 'block';
+
+                cameraControls.style.display = 'flex';
+                decisionControls.style.display = 'none';
+            } catch (err) {
+                console.error("Camera access error:", err);
+                statusDiv.textContent = "❌ Camera access failed. Please enable permissions and try again.";
+            }
+        }
+
+        // Stop video stream
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+        }
+
+        // Switch camera front/back
+        function switchCamera() {
+            facingMode = facingMode === 'user' ? 'environment' : 'user';
+            startCamera();
+        }
+
+        // Inject EXIF DateTime COM Marker to satisfy isFreshCapture check
+        function injectDateTimeIntoJpeg(arrayBuffer) {
+            const uint8 = new Uint8Array(arrayBuffer);
+            if (uint8[0] !== 0xFF || uint8[1] !== 0xD8) {
+                return uint8; // not a JPEG
+            }
+
+            // Create timestamp matching: YYYY:MM:DD HH:MM:SS
+            const now = new Date();
+            const pad = num => String(num).padStart(2, '0');
+            const dateStr = `${now.getFullYear()}:${pad(now.getMonth() + 1)}:${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+            const commentBytes = new TextEncoder().encode(dateStr);
+
+            // COM marker header: FF FE, then 2 bytes length (len = payload + 2)
+            const markerLen = commentBytes.length + 2;
+            const markerHeader = new Uint8Array([0xFF, 0xFE, (markerLen >> 8) & 0xFF, markerLen & 0xFF]);
+
+            // Construct new JPEG bytes with COM marker immediately after SOI
+            const newUint8 = new Uint8Array(uint8.length + markerHeader.length + commentBytes.length);
+            newUint8.set(uint8.subarray(0, 2), 0); // SOI (FF D8)
+            newUint8.set(markerHeader, 2);          // COM Header
+            newUint8.set(commentBytes, 6);          // Date String
+            newUint8.set(uint8.subarray(2), 6 + commentBytes.length); // rest of JPEG
+
+            return newUint8;
+        }
+
+        // Capture photo from video frame
+        function capturePhoto() {
+            if (!video.videoWidth) {
+                statusDiv.textContent = "⚠️ Camera not ready yet.";
+                return;
+            }
+
+            // Target dimensions for lightweight payload
+            let width = video.videoWidth;
+            let height = video.videoHeight;
+            const maxDim = 800;
+
+            if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
+                } else {
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // Draw current video frame to canvas
+            ctx.drawImage(video, 0, 0, width, height);
+
+            // Convert to JPEG blob at 0.7 quality to keep it ~20-30KB
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    statusDiv.textContent = "❌ Failed to process capture.";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    const arrayBuffer = reader.result;
+
+                    // Inject fresh timestamp to satisfy Go's isFreshCapture EXIF date regex check
+                    const uint8WithExif = injectDateTimeIntoJpeg(arrayBuffer);
+
+                    // Convert binary uint8 back to base64
+                    let binary = '';
+                    const len = uint8WithExif.byteLength;
+                    for (let i = 0; i < len; i++) {
+                        binary += String.fromCharCode(uint8WithExif[i]);
+                    }
+                    capturedBase64 = btoa(binary);
+
+                    // Stop video preview and show captured image preview
+                    stopCamera();
+                    video.style.display = 'none';
+                    guideFrame.style.display = 'none';
+
+                    preview.src = "data:image/jpeg;base64," + capturedBase64;
+                    preview.style.display = 'block';
+
+                    // Update controls
+                    cameraControls.style.display = 'none';
+                    decisionControls.style.display = 'flex';
+                    statusDiv.textContent = "";
+                };
+                reader.readAsArrayBuffer(blob);
+            }, 'image/jpeg', 0.7);
+        }
+
+        // Retake action
+        function retakePhoto() {
+            capturedBase64 = null;
+            startCamera();
+        }
+
+        // Submit action
+        function confirmAndSubmit() {
+            if (!capturedBase64) {
+                statusDiv.textContent = "❌ No captured image found.";
+                return;
+            }
+
+            statusDiv.textContent = "";
+            spinner.style.display = 'block';
+            decisionControls.style.display = 'none';
+
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    // Send base64 data to bot and automatically close web app view
+                    window.Telegram.WebApp.sendData(capturedBase64);
+                } else {
+                    // WebApp fallback outside Telegram
+                    spinner.style.display = 'none';
+                    statusDiv.textContent = "✅ Photo captured! (Not inside Telegram, cannot sendData)";
+                    decisionControls.style.display = 'flex';
+                }
+            } catch (err) {
+                console.error("Error submitting WebAppData:", err);
+                spinner.style.display = 'none';
+                decisionControls.style.display = 'flex';
+                statusDiv.textContent = "❌ Submission failed. Please try again.";
+            }
+        }
+
+        // Initialize on load
+        applyModeSettings();
+        startCamera();
+    </script>
+</body>
+
+</html>
