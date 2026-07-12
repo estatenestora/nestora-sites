@@ -615,12 +615,29 @@
 
             const botLink = `https://t.me/${BOT}?start=${payload}`;
 
-            setStatus('✅ Photo uploaded! Sending to Nestora bot…', true);
+            setStatus('✅ Photo uploaded! Redirecting…', true);
             statusEl.className = 'status ok';
 
-            /* Wait a moment so user sees the success message, then redirect */
+            /* Redirect and transition to success screen */
             setTimeout(() => {
                 window.location.href = botLink;
+
+                // Replace screen with confirmation message to avoid multiple active camera pages
+                document.body.innerHTML = `
+                    <div style="height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+                        <div style="background: var(--card-bg); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 28px; padding: 40px 22px; width: 100%; max-width: 400px; box-shadow: 0 30px 60px rgba(0,0,0,.45);">
+                            <div style="font-size: 54px; margin-bottom: 20px; animation: scaleUp 0.4s ease-out;">✅</div>
+                            <h1 style="font-size: 23px; font-weight: 700; margin-bottom: 12px; color: #fff;">Submission Complete!</h1>
+                            <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">You have been redirected back to the Nestora bot. You can now close this browser tab.</p>
+                            <button onclick="window.close()" style="background: linear-gradient(135deg, var(--purple), var(--purple-light)); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(124,58,237,.42); width: 100%; transition: transform 0.2s;">Close Tab</button>
+                        </div>
+                    </div>
+                `;
+
+                // Try to close the tab automatically after redirect triggers
+                setTimeout(() => {
+                    window.close();
+                }, 500);
             }, 1000);
         }
 
@@ -660,11 +677,25 @@
             const len = com.length + 2;
             const hdr = new Uint8Array([0xFF, 0xFE, (len >> 8) & 0xFF, len & 0xFF]);
 
+            // Find where to insert. Default to immediately after SOI (offset 2)
+            let insertOffset = 2;
+
+            // If the marker after SOI is APP0 (0xFFE0) or APP1 (0xFFE1), skip it safely
+            if (u8[2] === 0xFF && (u8[3] === 0xE0 || u8[3] === 0xE1)) {
+                const appLength = (u8[4] << 8) + u8[5];
+                insertOffset = 2 + appLength;
+            }
+
+            // Ensure insertOffset is within bounds
+            if (insertOffset > u8.length) {
+                insertOffset = 2;
+            }
+
             const out = new Uint8Array(u8.length + hdr.length + com.length);
-            out.set(u8.subarray(0, 2), 0);
-            out.set(hdr, 2);
-            out.set(com, 6);
-            out.set(u8.subarray(2), 6 + com.length);
+            out.set(u8.subarray(0, insertOffset), 0);
+            out.set(hdr, insertOffset);
+            out.set(com, insertOffset + hdr.length);
+            out.set(u8.subarray(insertOffset), insertOffset + hdr.length + com.length);
             return out;
         }
 
