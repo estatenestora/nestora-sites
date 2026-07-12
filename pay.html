@@ -345,7 +345,7 @@
                 Did your UPI app show a success message?<br>
                 Please confirm so Nestora can notify the admin automatically.
             </div>
-            <a class="confirm-yes" id="confirm-yes-btn" href="#">✅ Yes, I Paid Successfully</a>
+            <button class="confirm-yes" onclick="handleConfirmPayment()">✅ Yes, I Paid Successfully</button>
             <button class="confirm-no" onclick="closeOverlay()">❌ No, Payment Failed — Try Again</button>
             <button class="confirm-retry" onclick="closeOverlay()">🔄 Go back to payment options</button>
         </div>
@@ -379,7 +379,27 @@
         if (bookingId) {
             confirmLink = 'https://t.me/' + botUsername + '?start=pay_ok_' + bookingId;
         }
-        document.getElementById('confirm-yes-btn').href = confirmLink;
+
+        function handleConfirmPayment() {
+            closeOverlay();
+            window.location.href = confirmLink;
+
+            document.body.innerHTML = `
+                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+                    <div style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.15); border-radius: 28px; padding: 40px 22px; width: 100%; max-width: 400px; box-shadow: 0 30px 60px rgba(0,0,0,.45);">
+                        <div style="font-size: 54px; margin-bottom: 20px; animation: scaleUp 0.4s ease-out;">✅</div>
+                        <h1 style="font-size: 23px; font-weight: 700; margin-bottom: 12px; color: #fff;">Payment Confirmed!</h1>
+                        <p style="color: rgba(255, 255, 255, 0.55); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">You have been redirected back to the Nestora bot. You can now close this browser tab.</p>
+                        <button onclick="window.close()" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; padding: 14px 28px; border-radius: 14px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(124,58,237,0.42); width: 100%;">Close Tab</button>
+                    </div>
+                </div>
+            `;
+
+            // Auto close tab after 3 seconds to ensure Telegram app has launched successfully
+            setTimeout(function () {
+                window.close();
+            }, 5000);
+        }
 
         if (!phone) {
             document.getElementById('divider').style.display = 'none';
