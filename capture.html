@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nestora – Live Capture</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -13,6 +14,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -25,6 +27,7 @@
             --muted: rgba(255, 255, 255, 0.55);
             --red: #ef4444;
             --green: #10b981;
+            --amber: #f59e0b;
         }
 
         html,
@@ -43,6 +46,8 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
         .card {
@@ -74,6 +79,7 @@
             font-size: 13px;
             line-height: 1.55;
             margin-bottom: 20px;
+            min-height: 34px;
         }
 
         /* ── CAMERA BOX ── */
@@ -85,19 +91,14 @@
             background: #000;
             border: 2px solid rgba(167, 139, 250, .35);
             box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
-        /* Selfie / Profile = 1:1 square crop */
-        .cam-wrap.mode-selfie {
-            aspect-ratio: 1/1;
-        }
-
+        .cam-wrap.mode-selfie,
         .cam-wrap.mode-profile {
             aspect-ratio: 1/1;
         }
 
-        /* Aadhaar = landscape card ratio */
         .cam-wrap.mode-aadhaar {
             aspect-ratio: 1.7/1;
         }
@@ -109,6 +110,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            background: #000;
+        }
+
+        /* Mirror the front camera preview so it feels natural, like a browser selfie cam */
+        video.mirrored {
+            transform: scaleX(-1);
         }
 
         #preview {
@@ -125,7 +132,6 @@
             justify-content: center;
         }
 
-        /* Circle for selfie – punches a transparent hole in a dark backdrop */
         .frame-circle {
             width: 82%;
             aspect-ratio: 1/1;
@@ -134,9 +140,9 @@
             box-shadow:
                 0 0 0 9999px rgba(0, 0, 0, .42),
                 0 0 20px rgba(167, 139, 250, .35);
+            transition: border-color .25s, box-shadow .25s;
         }
 
-        /* Rounded rectangle for Aadhaar */
         .frame-rect {
             width: 92%;
             aspect-ratio: 1.586/1;
@@ -161,16 +167,106 @@
             color: rgba(255, 255, 255, .85);
         }
 
+        /* Small camera-facing badge, top-left */
+        .facing-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, .55);
+            border: 1px solid rgba(255, 255, 255, .18);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10.5px;
+            letter-spacing: .4px;
+            color: rgba(255, 255, 255, .8);
+            display: none;
+        }
+
+        /* Center overlay shown while camera (re)initializes */
+        .cam-loading {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0, 0, 0, .55);
+            z-index: 3;
+        }
+
+        .cam-loading.show {
+            display: flex;
+        }
+
+        .mini-spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255, 255, 255, .15);
+            border-left-color: var(--purple-light);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        .cam-loading span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .8);
+        }
+
+        /* Permission / hard-error state inside the camera box */
+        .cam-error {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px;
+            text-align: center;
+            background: rgba(10, 8, 24, .92);
+            z-index: 4;
+        }
+
+        .cam-error.show {
+            display: flex;
+        }
+
+        .cam-error .icon {
+            font-size: 34px;
+        }
+
+        .cam-error p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
         /* ── CONTROLS ── */
         .controls {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 12px;
+            gap: 28px;
+            padding: 4px 12px 0;
         }
 
-        .ctrl-placeholder {
-            display: none !important;
+        .side-btn-slot {
+            width: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Shutter */
@@ -182,10 +278,11 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 0 0 5px rgba(255, 255, 255, .18), 0 8px 24px rgba(0, 0, 0, .35);
-            transition: transform .15s, box-shadow .15s;
+            transition: transform .15s, box-shadow .15s, opacity .2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .shutter::after {
@@ -205,9 +302,13 @@
             box-shadow: 0 0 0 5px rgba(255, 255, 255, .12);
         }
 
+        .shutter:disabled {
+            opacity: .4;
+            pointer-events: none;
+        }
+
         /* Switch camera */
         .switch-btn {
-            display: none !important;
             width: 52px;
             height: 52px;
             border-radius: 50%;
@@ -216,7 +317,7 @@
             color: #fff;
             font-size: 22px;
             cursor: pointer;
-            transition: background .2s, transform .2s;
+            transition: background .2s, transform .3s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -224,11 +325,15 @@
 
         .switch-btn:hover {
             background: rgba(255, 255, 255, .2);
-            transform: rotate(45deg);
         }
 
         .switch-btn:active {
-            transform: rotate(90deg) scale(.9);
+            transform: rotate(180deg) scale(.9);
+        }
+
+        .switch-btn:disabled {
+            opacity: .35;
+            pointer-events: none;
         }
 
         .switch-btn.hidden {
@@ -251,7 +356,12 @@
             font-weight: 700;
             border: none;
             cursor: pointer;
-            transition: transform .2s, box-shadow .2s;
+            transition: transform .2s, box-shadow .2s, opacity .2s;
+        }
+
+        .btn:disabled {
+            opacity: .5;
+            pointer-events: none;
         }
 
         .btn-primary {
@@ -273,6 +383,26 @@
 
         .btn-secondary:hover {
             background: rgba(239, 68, 68, .25);
+        }
+
+        /* ── QUALITY WARNING BANNER ── */
+        .quality-warn {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, .14);
+            border: 1px solid rgba(245, 158, 11, .4);
+            color: #fcd34d;
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .quality-warn.show {
+            display: flex;
         }
 
         /* ── STATUS / SPINNER ── */
@@ -309,6 +439,18 @@
             }
         }
 
+        @keyframes scaleUp {
+            from {
+                transform: scale(.6);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
         /* ── RESPONSIVE ── */
         @media (max-width: 380px) {
             .card {
@@ -318,6 +460,16 @@
 
             h1 {
                 font-size: 19px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                transition-duration: 0.001ms !important;
             }
         }
     </style>
@@ -331,22 +483,39 @@
             <h1 id="ttl">Live Capture</h1>
             <p class="subtitle" id="sub">Starting camera…</p>
 
+            <div class="quality-warn" id="qualityWarn">⚠️ <span id="qualityWarnText"></span></div>
+
             <div class="cam-wrap" id="camWrap">
                 <video id="vid" autoplay playsinline muted></video>
                 <img id="preview" alt="preview">
                 <div class="frame-overlay" id="frameOverlay"></div>
                 <span class="frame-label" id="frameLabel"></span>
+                <span class="facing-badge" id="facingBadge"></span>
+
+                <div class="cam-loading" id="camLoading">
+                    <div class="mini-spinner"></div>
+                    <span id="camLoadingText">Connecting to camera…</span>
+                </div>
+
+                <div class="cam-error" id="camError">
+                    <div class="icon">🚫</div>
+                    <p id="camErrorText">Camera access is unavailable.</p>
+                    <button class="retry-btn" id="retryBtn" onclick="retryPermission()">Try Again</button>
+                </div>
             </div>
 
             <div class="controls" id="liveCtrls">
-                <div class="ctrl-placeholder"></div>
+                <div class="side-btn-slot"></div>
                 <button class="shutter" id="shutterBtn" onclick="capture()" title="Take photo"></button>
-                <button class="switch-btn" id="switchBtn" onclick="switchCam()" title="Switch camera">🔄</button>
+                <div class="side-btn-slot">
+                    <button class="switch-btn hidden" id="switchBtn" onclick="switchCam()"
+                        title="Switch camera">🔄</button>
+                </div>
             </div>
 
-            <div class="decision" id="decisionCtrls" style="display:none;">
-                <button class="btn btn-secondary" onclick="retake()">🔄 Retake</button>
-                <button class="btn btn-primary" onclick="submit()">✅ Confirm &amp; Submit</button>
+            <div class="decision" id="decisionCtrls">
+                <button class="btn btn-secondary" id="retakeBtn" onclick="retake()">🔄 Retake</button>
+                <button class="btn btn-primary" id="submitBtn" onclick="submit()">✅ Confirm &amp; Submit</button>
             </div>
 
             <div class="spinner" id="spin"></div>
@@ -361,6 +530,7 @@
         const MODE = params.get('mode') || 'selfie';   // selfie | aadhaar | profile
         const BOT = params.get('bot') || 'nestora_ai_dev1_bot';
         const USER_ID = params.get('user_id') || '';
+        const PREFERRED_FACING = MODE === 'aadhaar' ? 'environment' : 'user';
 
         /* ─────────────────── ELEMENTS ─────────────────── */
         const vid = document.getElementById('vid');
@@ -368,6 +538,7 @@
         const camWrap = document.getElementById('camWrap');
         const frameOver = document.getElementById('frameOverlay');
         const frameLabel = document.getElementById('frameLabel');
+        const facingBadge = document.getElementById('facingBadge');
         const liveCtrls = document.getElementById('liveCtrls');
         const decCtrls = document.getElementById('decisionCtrls');
         const shutterBtn = document.getElementById('shutterBtn');
@@ -376,16 +547,55 @@
         const statusEl = document.getElementById('statusMsg');
         const ttl = document.getElementById('ttl');
         const sub = document.getElementById('sub');
+        const camLoading = document.getElementById('camLoading');
+        const camLoadingText = document.getElementById('camLoadingText');
+        const camError = document.getElementById('camError');
+        const camErrorText = document.getElementById('camErrorText');
+        const qualityWarn = document.getElementById('qualityWarn');
+        const qualityWarnText = document.getElementById('qualityWarnText');
+
+        /* ─────────────────── TELEGRAM SETUP ─────────────────── */
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg) {
+            try {
+                tg.ready();
+                tg.expand();
+                // Prevent Telegram from swallowing the page in a background/suspended state
+                // mid-capture on iOS/Android, which is a common cause of the camera going black.
+                if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
+                if (typeof tg.setHeaderColor === 'function') { try { tg.setHeaderColor('#0f0c29'); } catch (e) { } }
+                if (typeof tg.enableClosingConfirmation === 'function') tg.enableClosingConfirmation();
+            } catch (e) {
+                console.warn('Telegram WebApp init warning:', e);
+            }
+        }
+
+        function haptic(kind) {
+            try {
+                if (!tg || !tg.HapticFeedback) return;
+                if (kind === 'success' || kind === 'error' || kind === 'warning') {
+                    tg.HapticFeedback.notificationOccurred(kind);
+                } else {
+                    tg.HapticFeedback.impactOccurred(kind || 'light');
+                }
+            } catch (e) { /* no-op */ }
+        }
 
         /* ─────────────────── STATE ─────────────────── */
-        let stream = null;
+        let stream = null;                 // the single live MediaStream, kept alive across retake
         let capturedBlob = null;
         let isSubmitting = false;
+        let videoDevices = [];              // [{deviceId, label}]
+        let currentDeviceId = null;         // deviceId actively in use, once known
+        let currentFacing = PREFERRED_FACING;
+        let deviceIndex = 0;                // index into videoDevices when we cycle through cameras
+        let permissionGranted = false;
+        let suspendedByVisibility = false;  // stream was intentionally stopped due to tab hidden
 
         /* ─────────────────── INIT ─────────────────── */
         (async function init() {
             applyMode();
-            await startStream();
+            await startStream({ initial: true });
         })();
 
         /* ─────────────────── MODE SETUP ─────────────────── */
@@ -394,80 +604,275 @@
 
             if (MODE === 'aadhaar') {
                 ttl.textContent = 'Aadhaar Card Upload';
-                sub.textContent = 'Place your Aadhaar card flat inside the blue frame. Using rear camera.';
+                sub.textContent = 'Place your Aadhaar card flat inside the blue frame, in good light.';
                 frameOver.innerHTML = '<div class="frame-rect"></div>';
                 frameLabel.textContent = 'Aadhaar Card Front';
             } else if (MODE === 'selfie') {
                 ttl.textContent = 'Live Selfie Capture';
-                sub.textContent = 'Look directly into the front camera. Keep your face inside the circle.';
+                sub.textContent = 'Look directly into the camera. Keep your face inside the circle.';
                 frameOver.innerHTML = '<div class="frame-circle"></div>';
                 frameLabel.textContent = 'Center Face Here';
             } else {
                 ttl.textContent = 'Profile Picture';
-                sub.textContent = 'Look directly into the front camera and snap a fresh photo.';
+                sub.textContent = 'Look directly into the camera and snap a fresh photo.';
                 frameOver.innerHTML = '<div class="frame-circle"></div>';
                 frameLabel.textContent = 'Center Face Here';
             }
         }
 
-        /* ─────────────────── STREAM ─────────────────── */
-        async function startStream() {
-            stopStream();
-            setStatus('Connecting to camera…', true);
+        /* ─────────────────── DEVICE DISCOVERY ─────────────────── */
+        // Labels are only populated by the browser once permission has been granted at least once,
+        // so we always call this AFTER a successful getUserMedia.
+        async function refreshDeviceList() {
+            try {
+                const all = await navigator.mediaDevices.enumerateDevices();
+                videoDevices = all.filter(d => d.kind === 'videoinput');
+            } catch (e) {
+                videoDevices = [];
+            }
 
-            // Require environment (back) camera for Aadhaar card, user (front) for selfie/profile
-            const facing = MODE === 'aadhaar' ? 'environment' : 'user';
-            const constraints = {
-                video: {
-                    facingMode: facing,
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                },
-                audio: false
-            };
+            // Only expose the switch button when there is genuinely something to switch to.
+            if (videoDevices.length > 1) {
+                switchBtn.classList.remove('hidden');
+            } else {
+                switchBtn.classList.add('hidden');
+            }
+
+            if (currentDeviceId) {
+                const idx = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
+                if (idx >= 0) deviceIndex = idx;
+            }
+        }
+
+        function guessFacingFromLabel(label) {
+            if (!label) return null;
+            const l = label.toLowerCase();
+            if (l.includes('front') || l.includes('user') || l.includes('face')) return 'user';
+            if (l.includes('back') || l.includes('rear') || l.includes('environment')) return 'environment';
+            return null;
+        }
+
+        /* ─────────────────── STREAM ACQUISITION ─────────────────── */
+        function buildConstraints({ deviceId, facingMode }) {
+            const video = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+            if (deviceId) {
+                video.deviceId = { exact: deviceId };
+            } else if (facingMode) {
+                video.facingMode = { ideal: facingMode };
+            }
+            return { video, audio: false };
+        }
+
+        async function acquireStream(opts) {
+            // opts: { deviceId } or { facingMode }
+            let s;
+            try {
+                s = await navigator.mediaDevices.getUserMedia(buildConstraints(opts));
+            } catch (err) {
+                if (opts.deviceId) {
+                    // exact deviceId can fail if the device disappeared (rotation, disconnect) — fall back to facingMode
+                    s = await navigator.mediaDevices.getUserMedia(buildConstraints({ facingMode: opts.facingMode || currentFacing }));
+                } else {
+                    // last-resort: any camera at all
+                    s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                }
+            }
+            return s;
+        }
+
+        function stopCurrentStream() {
+            if (stream) {
+                stream.getTracks().forEach(t => {
+                    t.onended = null;
+                    t.stop();
+                });
+                stream = null;
+            }
+        }
+
+        async function attachStreamToVideo(newStream) {
+            stream = newStream;
+
+            const track = stream.getVideoTracks()[0];
+            currentDeviceId = track && track.getSettings ? track.getSettings().deviceId || currentDeviceId : currentDeviceId;
+
+            const label = track ? track.label : '';
+            const settingsFacing = track && track.getSettings ? track.getSettings().facingMode : null;
+            currentFacing = settingsFacing || guessFacingFromLabel(label) || currentFacing;
+
+            // Re-detect camera drop caused by Telegram suspending the WebView / OS reclaiming the camera.
+            track && (track.onended = () => {
+                if (document.visibilityState === 'visible' && !suspendedByVisibility) {
+                    handleStreamLoss();
+                }
+            });
+
+            vid.srcObject = stream;
+            vid.classList.toggle('mirrored', currentFacing === 'user');
+
+            // Autoplay is unreliable inside Telegram's in-app WebView — drive it explicitly.
+            await new Promise((resolve) => {
+                const onReady = () => { vid.removeEventListener('loadedmetadata', onReady); resolve(); };
+                vid.addEventListener('loadedmetadata', onReady);
+                // Safety timeout in case the event never fires
+                setTimeout(resolve, 1500);
+            });
 
             try {
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                await vid.play();
+            } catch (e) {
+                // Some WebViews block programmatic play() without a fresh user gesture on the very
+                // first load. The visible shutter/switch taps that follow count as gestures, so a
+                // silent retry on the next user interaction recovers this automatically.
+            }
+
+            updateFacingBadge();
+        }
+
+        function updateFacingBadge() {
+            if (videoDevices.length > 1) {
+                facingBadge.style.display = 'block';
+                facingBadge.textContent = currentFacing === 'user' ? '🤳 Front' : '📷 Back';
+            } else {
+                facingBadge.style.display = 'none';
+            }
+        }
+
+        async function startStream({ initial = false, deviceId = null, facingMode = null } = {}) {
+            showCamLoading(initial ? 'Connecting to camera…' : 'Switching camera…');
+            hideCamError();
+            shutterBtn.disabled = true;
+            switchBtn.disabled = true;
+
+            try {
+                const newStream = await acquireStream({
+                    deviceId: deviceId || undefined,
+                    facingMode: facingMode || currentFacing
+                });
+
+                stopCurrentStream(); // release the old camera only once the new one is confirmed
+                await attachStreamToVideo(newStream);
+                permissionGranted = true;
+
+                await refreshDeviceList();
+
+                vid.style.display = 'block';
+                preview.style.display = 'none';
+                frameOver.style.display = 'flex';
+                frameLabel.style.display = 'block';
+                liveCtrls.style.display = 'flex';
+                decCtrls.style.display = 'none';
+                qualityWarn.classList.remove('show');
+                setStatus('', true);
             } catch (err) {
-                // Fallback constraint (try simple facingMode target)
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: facing },
-                        audio: false
-                    });
-                } catch (e2) {
-                    // Final fallback to generic video access
-                    try {
-                        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                    } catch (e3) {
-                        setStatus('❌ Camera access denied: ' + e3.message);
-                        return;
+                console.error('Camera error:', err);
+                showCamError(describeCameraError(err));
+            } finally {
+                hideCamLoading();
+                shutterBtn.disabled = false;
+                switchBtn.disabled = false;
+            }
+        }
+
+        function describeCameraError(err) {
+            const name = err && err.name ? err.name : '';
+            if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+                return 'Camera permission was denied. Please allow camera access for Telegram, then tap "Try Again".';
+            }
+            if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+                return 'No camera was found on this device.';
+            }
+            if (name === 'NotReadableError' || name === 'TrackStartError') {
+                return 'The camera is currently in use by another app. Close other camera apps and try again.';
+            }
+            if (name === 'OverconstrainedError') {
+                return 'This camera doesn\u2019t support the requested settings. Trying a basic camera instead may help — tap "Try Again".';
+            }
+            return 'Couldn\u2019t access the camera. Make sure you\u2019re using an up-to-date Telegram app, then tap "Try Again".';
+        }
+
+        function showCamLoading(text) {
+            camLoadingText.textContent = text || 'Connecting to camera…';
+            camLoading.classList.add('show');
+        }
+
+        function hideCamLoading() {
+            camLoading.classList.remove('show');
+        }
+
+        function showCamError(msg) {
+            camErrorText.textContent = msg;
+            camError.classList.add('show');
+            vid.style.display = 'none';
+            frameOver.style.display = 'none';
+            frameLabel.style.display = 'none';
+            liveCtrls.style.display = 'none';
+            decCtrls.style.display = 'none';
+            setStatus('');
+        }
+
+        function hideCamError() {
+            camError.classList.remove('show');
+        }
+
+        function retryPermission() {
+            startStream({ initial: true });
+        }
+
+        // If the camera track dies unexpectedly (e.g. Telegram reclaimed it), try a clean reconnect
+        // instead of leaving the user staring at a frozen black frame.
+        let recovering = false;
+        async function handleStreamLoss() {
+            if (recovering) return;
+            recovering = true;
+            setStatus('Reconnecting camera…', true);
+            await startStream({ deviceId: currentDeviceId, facingMode: currentFacing });
+            recovering = false;
+        }
+
+        // Pause the camera while the Telegram WebApp/tab is hidden and cleanly resume when it's
+        // visible again — this avoids the "camera stuck black, asks for permission again" loop
+        // that happens when a backgrounded stream gets silently killed by the OS.
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                if (stream && decCtrls.style.display !== 'flex') {
+                    suspendedByVisibility = true;
+                    stopCurrentStream();
+                }
+            } else if (document.visibilityState === 'visible') {
+                if (suspendedByVisibility) {
+                    suspendedByVisibility = false;
+                    if (decCtrls.style.display !== 'flex') {
+                        startStream({ deviceId: currentDeviceId, facingMode: currentFacing });
                     }
                 }
             }
+        });
 
-            vid.srcObject = stream;
-            vid.style.display = 'block';
-            preview.style.display = 'none';
-            frameOver.style.display = 'flex';
-            frameLabel.style.display = 'block';
-            liveCtrls.style.display = 'flex';
-            decCtrls.style.display = 'none';
-            setStatus('', true);
-        }
+        window.addEventListener('pagehide', stopCurrentStream);
+        window.addEventListener('beforeunload', stopCurrentStream);
 
-        function stopStream() {
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-                stream = null;
+        /* ─────────────────── SWITCH CAMERA ─────────────────── */
+        async function switchCam() {
+            if (switchBtn.classList.contains('hidden') || switchBtn.disabled) return;
+            haptic('light');
+
+            if (videoDevices.length > 1) {
+                deviceIndex = (deviceIndex + 1) % videoDevices.length;
+                const next = videoDevices[deviceIndex];
+                const guessedFacing = guessFacingFromLabel(next.label) || (currentFacing === 'user' ? 'environment' : 'user');
+                await startStream({ deviceId: next.deviceId, facingMode: guessedFacing });
+            } else {
+                // Fallback: simple front/back toggle by facingMode only
+                const nextFacing = currentFacing === 'user' ? 'environment' : 'user';
+                await startStream({ facingMode: nextFacing });
             }
         }
 
         /* ─────────────────── CAPTURE ─────────────────── */
         function capture() {
-            if (!vid.videoWidth) { setStatus('⚠️ Camera not ready yet.'); return; }
+            if (!vid.videoWidth) { setStatus('⚠️ Camera not ready yet, give it a second.'); return; }
 
-            /* Scale down to max 1024 px on the long edge */
             let w = vid.videoWidth;
             let h = vid.videoHeight;
             const maxDim = 1024;
@@ -480,43 +885,120 @@
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext('2d');
+
+            // Mirror back into the canvas too, so the saved photo matches what the user saw on screen.
+            if (currentFacing === 'user') {
+                ctx.translate(w, 0);
+                ctx.scale(-1, 1);
+            }
             ctx.drawImage(vid, 0, 0, w, h);
+            if (currentFacing === 'user') {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            }
+
+            const quality = assessFrameQuality(ctx, w, h);
 
             canvas.toBlob(blob => {
                 if (!blob) { setStatus('❌ Failed to capture frame.'); return; }
+                if (blob.size < 4000) {
+                    setStatus('⚠️ That capture looks empty or corrupted — please retake.');
+                    haptic('error');
+                    return;
+                }
 
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     const stamped = injectTimestamp(reader.result);
                     capturedBlob = new Blob([stamped], { type: 'image/jpeg' });
 
-                    /* Show preview */
-                    stopStream();
+                    // Freeze the live feed on the current frame instead of tearing the stream down —
+                    // this is what makes Retake instant and avoids re-triggering camera permission.
                     vid.style.display = 'none';
                     frameOver.style.display = 'none';
                     frameLabel.style.display = 'none';
+                    facingBadge.style.display = 'none';
                     preview.src = URL.createObjectURL(capturedBlob);
                     preview.style.display = 'block';
 
                     liveCtrls.style.display = 'none';
                     decCtrls.style.display = 'flex';
+
+                    if (quality.warning) {
+                        qualityWarnText.textContent = quality.warning;
+                        qualityWarn.classList.add('show');
+                    } else {
+                        qualityWarn.classList.remove('show');
+                    }
+
                     setStatus('');
+                    haptic('success');
                 };
                 reader.readAsArrayBuffer(blob);
-            }, 'image/jpeg', 0.82);
+            }, 'image/jpeg', 0.88);
+        }
+
+        // Lightweight heuristic check (no ML): flags frames that are almost uniformly dark or
+        // uniformly flat (lens covered, camera still warming up, pointed at a blank wall).
+        function assessFrameQuality(ctx, w, h) {
+            try {
+                const sampleW = 64, sampleH = 64;
+                const off = document.createElement('canvas');
+                off.width = sampleW;
+                off.height = sampleH;
+                const octx = off.getContext('2d');
+                octx.drawImage(ctx.canvas, 0, 0, w, h, 0, 0, sampleW, sampleH);
+                const data = octx.getImageData(0, 0, sampleW, sampleH).data;
+
+                let sum = 0, sumSq = 0, n = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    const lum = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                    sum += lum;
+                    sumSq += lum * lum;
+                    n++;
+                }
+                const mean = sum / n;
+                const variance = (sumSq / n) - (mean * mean);
+
+                if (mean < 18) {
+                    return { warning: 'This photo looks very dark. Move to better light and retake if needed.' };
+                }
+                if (variance < 6) {
+                    return { warning: 'This photo looks blank or out of focus — retake if the ' + (MODE === 'aadhaar' ? 'card' : 'photo') + " isn't clearly visible." };
+                }
+                return { warning: null };
+            } catch (e) {
+                return { warning: null };
+            }
         }
 
         /* ─────────────────── RETAKE ─────────────────── */
         function retake() {
+            haptic('light');
             capturedBlob = null;
+            qualityWarn.classList.remove('show');
             decCtrls.style.display = 'none';
-            startStream();
+
+            // The stream was never stopped on capture, so we just need to show it again —
+            // no getUserMedia call, no repeat permission prompt, no black flash.
+            if (stream && stream.getVideoTracks().some(t => t.readyState === 'live')) {
+                vid.style.display = 'block';
+                frameOver.style.display = 'flex';
+                frameLabel.style.display = 'block';
+                liveCtrls.style.display = 'flex';
+                updateFacingBadge();
+                setStatus('', true);
+                vid.play().catch(() => { });
+            } else {
+                // Stream died in the background for some reason — reconnect cleanly.
+                startStream({ deviceId: currentDeviceId, facingMode: currentFacing });
+            }
         }
 
         /* ─────────────────── SUBMIT ─────────────────── */
         async function submit() {
             if (!capturedBlob || isSubmitting) return;
             isSubmitting = true;
+            haptic('light');
 
             decCtrls.style.display = 'none';
             spinEl.style.display = 'block';
@@ -529,30 +1011,29 @@
                 spinEl.style.display = 'none';
                 decCtrls.style.display = 'flex';
                 isSubmitting = false;
+                haptic('error');
                 setStatus('❌ Upload failed: ' + e.message);
                 return;
             }
 
             const downloadUrl = `https://tmpfiles.org/dl/${fileID}/capture.jpg`;
 
-            // If running inside Telegram WebApp, send data directly and close
-            if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.sendData === 'function') {
+            stopCurrentStream(); // release the camera before we navigate away
+
+            if (tg && typeof tg.sendData === 'function') {
                 try {
-                    window.Telegram.WebApp.sendData(downloadUrl);
-                    window.Telegram.WebApp.close();
+                    tg.sendData(downloadUrl);
+                    tg.close();
                     return;
                 } catch (e) {
-                    console.error("Telegram WebApp sendData failed: ", e);
+                    console.error('Telegram WebApp sendData failed: ', e);
                 }
             }
 
             /*
              * Build the Telegram deep link payload (fallback for external browsers).
              * Format: photo_MODE_USERID_FILEID
-             * e.g.:   photo_aadhaar_123456789_9876543
-             *
              * Telegram /start parameter limit = 64 chars (A-Z a-z 0-9 _ -)
-             * "photo_aadhaar_" (14) + USER_ID (≤10) + "_" (1) + fileID (≤9) ≤ 34 chars  ✓
              */
             const payload = `photo_${MODE}_${USER_ID}_${fileID}`;
 
@@ -568,12 +1049,11 @@
 
             setStatus('✅ Photo uploaded! Redirecting…', true);
             statusEl.className = 'status ok';
+            haptic('success');
 
-            /* Redirect and transition to success screen */
             setTimeout(() => {
                 window.location.href = botLink;
 
-                // Replace screen with confirmation message to avoid multiple active camera pages
                 document.body.innerHTML = `
                     <div style="height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;">
                         <div style="background: var(--card-bg); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 28px; padding: 40px 22px; width: 100%; max-width: 400px; box-shadow: 0 30px 60px rgba(0,0,0,.45);">
@@ -585,7 +1065,6 @@
                     </div>
                 `;
 
-                // Try to close the tab automatically after redirect triggers (wait 3 seconds for protocol launch)
                 setTimeout(() => {
                     window.close();
                 }, 5000);
@@ -593,10 +1072,6 @@
         }
 
         /* ─────────────────── UPLOAD ─────────────────── */
-        /**
-         * Uploads blob to tmpfiles.org and returns the numeric file ID string.
-         * e.g. for https://tmpfiles.org/dl/1234567/capture.jpg → returns "1234567"
-         */
         async function uploadToTmpfiles(blob) {
             const fd = new FormData();
             fd.append('file', blob, 'capture.jpg');
@@ -608,12 +1083,10 @@
             if (json.status !== 'success' || !json.data?.url)
                 throw new Error('Bad response from upload server');
 
-            /* Extract the numeric ID from the view URL.
-               URL format: https://tmpfiles.org/1234567/capture.jpg */
-            const viewUrl = json.data.url;              // e.g. https://tmpfiles.org/1234567/capture.jpg
+            const viewUrl = json.data.url;
             const match = viewUrl.match(/tmpfiles\.org\/([\w]+)\//i);
             if (!match) throw new Error('Could not parse file ID from: ' + viewUrl);
-            return match[1];                            // returns "1234567"
+            return match[1];
         }
 
         /* ─────────────────── JPEG TIMESTAMP (liveness) ─────────────────── */
@@ -628,16 +1101,11 @@
             const len = com.length + 2;
             const hdr = new Uint8Array([0xFF, 0xFE, (len >> 8) & 0xFF, len & 0xFF]);
 
-            // Find where to insert. Default to immediately after SOI (offset 2)
             let insertOffset = 2;
-
-            // If the marker after SOI is APP0 (0xFFE0) or APP1 (0xFFE1), skip it safely
             if (u8[2] === 0xFF && (u8[3] === 0xE0 || u8[3] === 0xE1)) {
                 const appLength = (u8[4] << 8) + u8[5];
                 insertOffset = 2 + appLength;
             }
-
-            // Ensure insertOffset is within bounds
             if (insertOffset > u8.length) {
                 insertOffset = 2;
             }
