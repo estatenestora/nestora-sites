@@ -251,7 +251,7 @@
         }
 
         @keyframes spin {
-            0 {
+            0% {
                 transform: rotate(0deg);
             }
 
@@ -287,8 +287,8 @@
         </div>
 
         <div class="decision-buttons" id="decision-controls">
-            <button class="pay-btn secondary" onclick="retakePhoto()">🔄 Retake</button>
-            <button class="pay-btn" onclick="confirmAndSubmit()">✅ Confirm & Submit</button>
+            <button class="pay-btn secondary" id="retake-btn" onclick="retakePhoto()">🔄 Retake</button>
+            <button class="pay-btn" id="submit-btn" onclick="confirmAndSubmit()">✅ Confirm & Submit</button>
         </div>
 
         <div class="status-message" id="status"></div>
@@ -318,7 +318,9 @@
 
         let currentStream = null;
         let facingMode = mode === 'aadhaar' ? 'environment' : 'user';
-        let capturedBase64 = null;
+        let capturedBlob = null;
+        let videoDevices = [];
+        let currentDeviceIndex = 0;
 
         // Apply UI configurations based on mode
         function applyModeSettings() {
@@ -340,17 +342,66 @@
             }
         }
 
+        // Enumerate video devices for robust switching
+        async function initCameraDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                videoDevices = devices.filter(device => device.kind === 'videoinput');
+                console.log("Enumerated cameras:", videoDevices);
+
+                // Select default device based on mode and device labels
+                if (videoDevices.length > 0) {
+                    let defaultIndex = 0;
+                    if (mode === 'aadhaar') {
+                        // Prefer back camera
+                        const backIndex = videoDevices.findIndex(d =>
+                            d.label.toLowerCase().includes('back') ||
+                            d.label.toLowerCase().includes('rear') ||
+                            d.label.toLowerCase().includes('environment') ||
+                            d.label.toLowerCase().includes('main')
+                        );
+                        if (backIndex !== -1) defaultIndex = backIndex;
+                    } else {
+                        // Prefer front camera
+                        const frontIndex = videoDevices.findIndex(d =>
+                            d.label.toLowerCase().includes('front') ||
+                            d.label.toLowerCase().includes('user') ||
+                            d.label.toLowerCase().includes('selfie')
+                        );
+                        if (frontIndex !== -1) defaultIndex = frontIndex;
+                    }
+                    currentDeviceIndex = defaultIndex;
+                }
+            } catch (err) {
+                console.warn("Could not enumerate camera devices:", err);
+            }
+        }
+
         // Start video stream
         async function startCamera() {
             stopCamera();
             statusDiv.textContent = "";
             try {
-                const constraints = {
-                    video: {
+                let videoConstraint = {};
+
+                if (videoDevices.length > 0) {
+                    const selectedDevice = videoDevices[currentDeviceIndex];
+                    videoConstraint = {
+                        deviceId: { exact: selectedDevice.deviceId },
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    };
+                } else {
+                    // Fallback to facingMode if devices list is empty
+                    videoConstraint = {
                         facingMode: facingMode,
                         width: { ideal: 1280 },
                         height: { ideal: 960 }
-                    },
+                    };
+                }
+
+                const constraints = {
+                    video: videoConstraint,
                     audio: false
                 };
 
@@ -363,8 +414,22 @@
                 cameraControls.style.display = 'flex';
                 decisionControls.style.display = 'none';
             } catch (err) {
-                console.error("Camera access error:", err);
-                statusDiv.textContent = "❌ Camera access failed. Please enable permissions and try again.";
+                console.error("Camera getUserMedia error, trying fallback:", err);
+                // Fallback to any available video input if exact matching/labels failed
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: facingMode },
+                        audio: false
+                    });
+                    video.srcObject = currentStream;
+                    video.style.display = 'block';
+                    preview.style.display = 'none';
+                    guideFrame.style.display = 'block';
+                    cameraControls.style.display = 'flex';
+                    decisionControls.style.display = 'none';
+                } catch (fallbackErr) {
+                    statusDiv.textContent = "❌ Camera access failed. Please enable permissions and try again.";
+                }
             }
         }
 
@@ -376,10 +441,34 @@
             }
         }
 
-        // Switch camera front/back
-        function switchCamera() {
-            facingMode = facingMode === 'user' ? 'environment' : 'user';
-            startCamera();
+        // Switch camera cycler
+        async function switchCamera() {
+            if (videoDevices.length > 1) {
+                currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+                console.log("Switching to camera index:", currentDeviceIndex, videoDevices[currentDeviceIndex]);
+                await startCamera();
+            } else {
+                // Toggle simple facingMode fallback
+                facingMode = facingMode === 'user' ? 'environment' : 'user';
+                console.log("Switching facingMode constraint fallback to:", facingMode);
+                await startCamera();
+            }
+        }
+
+        // Request initial permission, enumerate, and start
+        async function initialize() {
+            applyModeSettings();
+            try {
+                // Request temporary access to trigger permission dialog and label enumeration
+                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                tempStream.getTracks().forEach(track => track.stop()); // close immediately
+
+                await initCameraDevices();
+                await startCamera();
+            } catch (err) {
+                console.error("Initial camera permission denied:", err);
+                statusDiv.textContent = "❌ Camera permission required. Please allow access in browser.";
+            }
         }
 
         // Inject EXIF DateTime COM Marker to satisfy isFreshCapture check
@@ -416,7 +505,7 @@
                 return;
             }
 
-            // Target dimensions for lightweight payload
+            // Target dimensions for lightweight payload (max 800px)
             let width = video.videoWidth;
             let height = video.videoHeight;
             const maxDim = 800;
@@ -439,7 +528,7 @@
             // Draw current video frame to canvas
             ctx.drawImage(video, 0, 0, width, height);
 
-            // Convert to JPEG blob at 0.7 quality to keep it ~20-30KB
+            // Convert to JPEG blob at 0.75 quality
             canvas.toBlob((blob) => {
                 if (!blob) {
                     statusDiv.textContent = "❌ Failed to process capture.";
@@ -453,20 +542,16 @@
                     // Inject fresh timestamp to satisfy Go's isFreshCapture EXIF date regex check
                     const uint8WithExif = injectDateTimeIntoJpeg(arrayBuffer);
 
-                    // Convert binary uint8 back to base64
-                    let binary = '';
-                    const len = uint8WithExif.byteLength;
-                    for (let i = 0; i < len; i++) {
-                        binary += String.fromCharCode(uint8WithExif[i]);
-                    }
-                    capturedBase64 = btoa(binary);
+                    // Convert binary back to blob to hold for upload
+                    capturedBlob = new Blob([uint8WithExif], { type: 'image/jpeg' });
 
                     // Stop video preview and show captured image preview
                     stopCamera();
                     video.style.display = 'none';
                     guideFrame.style.display = 'none';
 
-                    preview.src = "data:image/jpeg;base64," + capturedBase64;
+                    // Create object URL for local preview display
+                    preview.src = URL.createObjectURL(capturedBlob);
                     preview.style.display = 'block';
 
                     // Update controls
@@ -475,47 +560,68 @@
                     statusDiv.textContent = "";
                 };
                 reader.readAsArrayBuffer(blob);
-            }, 'image/jpeg', 0.7);
+            }, 'image/jpeg', 0.75);
         }
 
         // Retake action
         function retakePhoto() {
-            capturedBase64 = null;
+            capturedBlob = null;
             startCamera();
         }
 
-        // Submit action
-        function confirmAndSubmit() {
-            if (!capturedBase64) {
+        // Upload to tmpfiles.org and submit URL back to bot
+        async function confirmAndSubmit() {
+            if (!capturedBlob) {
                 statusDiv.textContent = "❌ No captured image found.";
                 return;
             }
 
-            statusDiv.textContent = "";
+            statusDiv.textContent = "📤 Uploading photo, please wait...";
             spinner.style.display = 'block';
             decisionControls.style.display = 'none';
 
             try {
+                // Upload via anonymous tmpfiles.org multi-part form upload
+                const formData = new FormData();
+                formData.append('file', capturedBlob, 'capture.jpg');
+
+                const res = await fetch('https://tmpfiles.org/api/v1/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Upload server returned status ${res.status}`);
+                }
+
+                const json = await res.json();
+                if (json.status !== 'success' || !json.data || !json.data.url) {
+                    throw new Error("Invalid response from upload server.");
+                }
+
+                // Convert view URL (https://tmpfiles.org/12345/filename) to direct download link (https://tmpfiles.org/dl/12345/filename)
+                const directUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                console.log("Direct download URL generated:", directUrl);
+
                 if (window.Telegram && window.Telegram.WebApp) {
-                    // Send base64 data to bot and automatically close web app view
-                    window.Telegram.WebApp.sendData(capturedBase64);
+                    // Send download URL string to bot and automatically close web app view
+                    window.Telegram.WebApp.sendData(directUrl);
                 } else {
                     // WebApp fallback outside Telegram
                     spinner.style.display = 'none';
-                    statusDiv.textContent = "✅ Photo captured! (Not inside Telegram, cannot sendData)";
+                    statusDiv.textContent = "✅ Photo uploaded successfully! URL: " + directUrl;
                     decisionControls.style.display = 'flex';
                 }
             } catch (err) {
-                console.error("Error submitting WebAppData:", err);
+                console.error("Submission failed:", err);
                 spinner.style.display = 'none';
                 decisionControls.style.display = 'flex';
-                statusDiv.textContent = "❌ Submission failed. Please try again.";
+                statusDiv.textContent = "❌ Submission failed: " + err.message;
             }
         }
 
-        // Initialize on load
-        applyModeSettings();
-        startCamera();
+        // Start initialization sequence
+        initialize();
     </script>
 </body>
 
