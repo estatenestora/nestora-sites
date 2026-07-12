@@ -634,10 +634,10 @@
                     </div>
                 `;
 
-                // Try to close the tab automatically after redirect triggers
+                // Try to close the tab automatically after redirect triggers (wait 3 seconds for protocol launch)
                 setTimeout(() => {
                     window.close();
-                }, 500);
+                }, 5000);
             }, 1000);
         }
 
