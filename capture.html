@@ -870,11 +870,66 @@
         }
 
         /* ─────────────────── CAPTURE ─────────────────── */
+        // Maps the CSS-space frame overlay (the dashed rectangle the user is shown)
+        // to actual source-video pixel coordinates, accounting for how object-fit:
+        // cover crops/scales the raw camera feed to fill the container. Without this,
+        // the capture always contained the full camera view instead of just what the
+        // frame outlined.
+        function getFrameSourceRect() {
+            const cw = camWrap.clientWidth;
+            const ch = camWrap.clientHeight;
+            const vw = vid.videoWidth;
+            const vh = vid.videoHeight;
+            if (!cw || !ch || !vw || !vh) return null;
+
+            // object-fit: cover scaling — video is scaled up to fully cover the
+            // container, then centered and cropped on the overflowing axis.
+            const scale = Math.max(cw / vw, ch / vh);
+            const dispW = vw * scale;
+            const dispH = vh * scale;
+            const cropX = (dispW - cw) / 2; // pixels cropped off each side, in displayed space
+            const cropY = (dispH - ch) / 2;
+
+            let rectW, rectH, rectX, rectY;
+            if (MODE === 'aadhaar') {
+                rectW = cw * 0.92;
+                rectH = rectW / 1.586; // matches .frame-rect aspect-ratio
+            } else {
+                // selfie/profile: circle guide — no tighter crop needed, the square
+                // container already matches what's shown.
+                return null;
+            }
+            rectX = (cw - rectW) / 2;
+            rectY = (ch - rectH) / 2;
+
+            // Convert CSS-space rect -> displayed-video-space -> source-video pixels
+            const sx = (rectX + cropX) / scale;
+            const sy = (rectY + cropY) / scale;
+            const sw = rectW / scale;
+            const sh = rectH / scale;
+
+            return {
+                sx: Math.max(0, sx),
+                sy: Math.max(0, sy),
+                sw: Math.min(sw, vw),
+                sh: Math.min(sh, vh)
+            };
+        }
+
         function capture() {
             if (!vid.videoWidth) { setStatus('⚠️ Camera not ready yet, give it a second.'); return; }
 
-            let w = vid.videoWidth;
-            let h = vid.videoHeight;
+            const frameRect = getFrameSourceRect();
+
+            // Source region to read from the video: either the full frame, or (for
+            // Aadhaar) just the area inside the dashed rectangle guide.
+            const srcX = frameRect ? frameRect.sx : 0;
+            const srcY = frameRect ? frameRect.sy : 0;
+            const srcW = frameRect ? frameRect.sw : vid.videoWidth;
+            const srcH = frameRect ? frameRect.sh : vid.videoHeight;
+
+            let w = srcW;
+            let h = srcH;
             const maxDim = 1024;
             if (w > maxDim || h > maxDim) {
                 if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
@@ -891,7 +946,7 @@
                 ctx.translate(w, 0);
                 ctx.scale(-1, 1);
             }
-            ctx.drawImage(vid, 0, 0, w, h);
+            ctx.drawImage(vid, srcX, srcY, srcW, srcH, 0, 0, w, h);
             if (currentFacing === 'user') {
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
             }
@@ -911,9 +966,12 @@
                     const stamped = injectTimestamp(reader.result);
                     capturedBlob = new Blob([stamped], { type: 'image/jpeg' });
 
-                    // Freeze the live feed on the current frame instead of tearing the stream down —
-                    // this is what makes Retake instant and avoids re-triggering camera permission.
-                    vid.style.display = 'none';
+                    // Show the still preview ON TOP of the live video (both are absolutely
+                    // positioned; preview simply sits above it in stacking order) instead of
+                    // hiding the <video> element. Some mobile WebViews stop decoding frames
+                    // once a <video> is display:none, which froze the feed permanently and
+                    // made Retake show a stale, non-live picture. Leaving the video running
+                    // underneath means Retake is instant and always shows the real live feed.
                     frameOver.style.display = 'none';
                     frameLabel.style.display = 'none';
                     facingBadge.style.display = 'none';
@@ -978,10 +1036,14 @@
             qualityWarn.classList.remove('show');
             decCtrls.style.display = 'none';
 
-            // The stream was never stopped on capture, so we just need to show it again —
-            // no getUserMedia call, no repeat permission prompt, no black flash.
+            // The stream was never stopped on capture, so the video underneath has
+            // been live the whole time — we just need to hide the still preview
+            // image again to reveal it. (Previously this never hid `preview`, so
+            // the old photo stayed visually on top forever — that's why camera
+            // movement never appeared to "take" after a retake.)
+            preview.style.display = 'none';
+
             if (stream && stream.getVideoTracks().some(t => t.readyState === 'live')) {
-                vid.style.display = 'block';
                 frameOver.style.display = 'flex';
                 frameLabel.style.display = 'block';
                 liveCtrls.style.display = 'flex';
