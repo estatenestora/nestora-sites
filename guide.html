@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Nestora — User Guide</title>
+  <meta name="description" content="Complete step-by-step guide for all Nestora flows.">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2330;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #10b981;
+      --orange: #f59e0b;
+      --purple: #a78bfa;
+      --red: #f87171;
+      --sky: #0ea5e9;
+      --radius: 12px;
+      --ease: 0.28s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: -apple-system, 'SF Pro Text', 'Inter', BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ─── Layout ─────────────────────────────────────── */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .hdr {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .hdr-logo {
+      font-size: 20px;
+    }
+
+    .hdr-title {
+      font-size: 15px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hdr-sub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .hbtn {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: background var(--ease);
+    }
+
+    .hbtn:active {
+      background: var(--border);
+    }
+
+    /* ─── Drawer ─────────────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(3px);
+    }
+
+    .overlay.open {
+      display: block;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 82%;
+      max-width: 310px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      z-index: 51;
+      transform: translateX(-100%);
+      transition: transform 0.32s cubic-bezier(.4, 0, .2, 1);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-hdr {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .drawer-hdr h2 {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .drawer-close {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+    }
+
+    .dgroup {
+      padding: 8px 0;
+    }
+
+    .dgroup-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 4px 14px 5px;
+    }
+
+    .ditem {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: background var(--ease);
+      border-left: 3px solid transparent;
+    }
+
+    .ditem:active,
+    .ditem:hover {
+      background: var(--surface2);
+    }
+
+    .ditem.active {
+      border-left-color: var(--accent);
+      background: var(--surface2);
+    }
+
+    .ditem-icon {
+      font-size: 17px;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .ditem-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .ditem-count {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ─── Role badges ────────────────────────────────── */
+    .rbadge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .rc {
+      background: rgba(14, 165, 233, .15);
+      color: var(--sky);
+      border: 1px solid rgba(14, 165, 233, .3);
+    }
+
+    .rp {
+      background: rgba(16, 185, 129, .15);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, .3);
+    }
+
+    .ra {
+      background: rgba(245, 158, 11, .15);
+      color: var(--orange);
+      border: 1px solid rgba(245, 158, 11, .3);
+    }
+
+    .rk {
+      background: rgba(167, 139, 250, .15);
+      color: var(--purple);
+      border: 1px solid rgba(167, 139, 250, .3);
+    }
+
+    .rb {
+      background: rgba(16, 185, 129, .1);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, .2);
+    }
+
+    /* ─── Content area ───────────────────────────────── */
+    .content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Flow header bar ────────────────────────────── */
+    .flow-hdr {
+      padding: 12px 14px 8px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      display: none;
+    }
+
+    .flow-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+
+    .flow-icon {
+      font-size: 18px;
+    }
+
+    .flow-name {
+      font-size: 15px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .prog-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prog-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--purple));
+      border-radius: 999px;
+      transition: width 0.4s var(--ease);
+    }
+
+    .prog-txt {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ─── Welcome screen ─────────────────────────────── */
+    #welcome {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      text-align: center;
+      gap: 14px;
+    }
+
+    #welcome .w-logo {
+      font-size: 54px;
+      line-height: 1;
+    }
+
+    #welcome .w-title {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    #welcome .w-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 272px;
+    }
+
+    /* ─── Flow Overview screen ───────────────────────── */
+    #overview {
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+      padding: 14px 14px 80px;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .ov-hero {
+      background: linear-gradient(135deg, #1a2537, #1c1a30);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ov-hero-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ov-hero-icon {
+      font-size: 28px;
+    }
+
+    .ov-hero-title {
+      font-size: 18px;
+      font-weight: 800;
+      flex: 1;
+    }
+
+    .ov-hero-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .ov-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ov-meta-chip {
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 8px;
+    }
+
+    .ov-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 4px 0;
+    }
+
+    /* Step timeline */
+    .step-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 0;
+      cursor: pointer;
+      transition: background var(--ease);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .tl-item:active {
+      background: var(--surface2);
+    }
+
+    .tl-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 36px;
+      flex-shrink: 0;
+    }
+
+    .tl-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+      margin-top: 10px;
+      transition: all var(--ease);
+    }
+
+    .tl-num.done {
+      background: rgba(88, 166, 255, .15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tl-num.current {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(88, 166, 255, .35);
+    }
+
+    .tl-line {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      margin: 4px auto;
+    }
+
+    .tl-item:last-child .tl-line {
+      display: none;
+    }
+
+    .tl-right {
+      flex: 1;
+      padding: 8px 10px 8px 2px;
+    }
+
+    .tl-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .tl-state {
+      font-size: 9px;
+      font-family: monospace;
+      color: var(--accent);
+      opacity: .8;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .tl-sub {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 3px;
+    }
+
+    .tl-arrow {
+      font-size: 14px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      padding-right: 2px;
+    }
+
+    .ov-start-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      border: none;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(88, 166, 255, .25);
+      transition: opacity var(--ease);
+    }
+
+    .ov-start-btn:active {
+      opacity: 0.85;
+    }
+
+    /* ─── Steps viewport ─────────────────────────────── */
+    #steps-vp {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      display: none;
+    }
+
+    .steps-track {
+      display: flex;
+      height: 100%;
+      transition: transform 0.35s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .step-card {
+      min-width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 14px 14px 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .step-num-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      align-self: flex-start;
+    }
+
+    .step-num-chip .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .state-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 999px;
+      align-self: flex-start;
+      background: rgba(88, 166, 255, .1);
+      color: var(--accent);
+      border: 1px solid rgba(88, 166, 255, .22);
+      font-family: monospace;
+    }
+
+    .step-h {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.22;
+    }
+
+    .step-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .icard {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .icard-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .icard-body {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .btns-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .bchip {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 7px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .bchip.p {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(88, 166, 255, .08);
+    }
+
+    .bchip.s {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(16, 185, 129, .08);
+    }
+
+    .bchip.w {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: rgba(245, 158, 11, .08);
+    }
+
+    .bchip.d {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(248, 113, 113, .08);
+    }
+
+    .tip {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      background: rgba(124, 58, 237, .08);
+      border: 1px solid rgba(124, 58, 237, .2);
+      border-radius: var(--radius);
+      padding: 9px 11px;
+    }
+
+    .tip-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .tip-text {
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .tip-text strong {
+      color: #a78bfa;
+    }
+
+    .fee-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .fee-table th {
+      background: var(--border);
+      padding: 5px 7px;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .fee-table td {
+      padding: 5px 7px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── Nav bar ────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: none;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 20;
+    }
+
+    .nav.show {
+      display: flex;
+    }
+
+    .nbtn {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      transition: all var(--ease);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .nbtn:active {
+      background: var(--border);
+    }
+
+    .nbtn:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+    }
+
+    .nbtn.prim {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(88, 166, 255, .25);
+    }
+
+    .nbtn.prim:active {
+      opacity: .88;
+    }
+
+    .nbtn.outline {
+      background: transparent;
+      flex: 0.6;
+    }
+
+    .step-ind {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      min-width: 46px;
+      flex-shrink: 0;
+    }
+
+    /* ─── Utility ────────────────────────────────────── */
+    .gbtn {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      transition: all var(--ease);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .gbtn:active {
+      background: var(--border);
+    }
+
+    .gbtn.prim {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .step-card,
+    #overview {
+      animation: fadeUp .28s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <div class="hdr">
+      <button class="hbtn" onclick="openDrawer()" aria-label="All flows">☰</button>
+      <div class="hdr-logo">🏠</div>
+      <div style="flex:1;min-width:0">
+        <div class="hdr-title" id="hdr-title">Nestora Guide</div>
+        <div class="hdr-sub" id="hdr-sub">Tap ☰ to pick a flow</div>
+      </div>
+      <button class="hbtn" id="overview-btn" onclick="showOverview()" style="display:none" title="Flow map">📋</button>
+    </div>
+
+    <!-- Drawer overlay -->
+    <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+    <!-- Drawer -->
+    <div class="drawer" id="drawer">
+      <div class="drawer-hdr">
+        <h2>All Flows</h2>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      </div>
+      <div id="drawer-body"></div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content" id="content">
+
+      <!-- Flow header (progress bar) -->
+      <div class="flow-hdr" id="flow-hdr">
+        <div class="flow-title-row">
+          <span class="flow-icon" id="fh-icon"></span>
+          <span class="flow-name" id="fh-name"></span>
+          <span class="rbadge" id="fh-role"></span>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-track">
+            <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+          </div>
+          <div class="prog-txt" id="prog-txt">0 / 0</div>
+        </div>
+      </div>
+
+      <!-- Welcome screen -->
+      <div id="welcome">
+        <div class="w-logo">🏠</div>
+        <div class="w-title">Nestora Guide</div>
+        <div class="w-sub">A complete visual guide to every flow in Nestora — from finding a service to getting paid.
+        </div>
+        <button class="gbtn prim" style="margin-top:6px;max-width:220px" onclick="openDrawer()">☰ Browse All
+          Flows</button>
+      </div>
+
+      <!-- Flow Overview screen -->
+      <div id="overview"
+        style="display:none;flex:1;overflow-y:auto;padding:14px 14px 80px;flex-direction:column;gap:14px"></div>
+
+      <!-- Steps viewport -->
+      <div id="steps-vp" style="display:none;flex:1;overflow:hidden;position:relative">
+        <div class="steps-track" id="steps-track"></div>
+      </div>
+
+    </div>
+
+    <!-- Nav bar -->
+    <div class="nav" id="nav">
+      <button class="nbtn" id="prev-btn" onclick="navigate(-1)" disabled>← Prev</button>
+      <div class="step-ind" id="step-ind">1 / 1</div>
+      <button class="nbtn prim" id="next-btn" onclick="navigate(1)">Next →</button>
+    </div>
+
+  </div>
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────────
+    // ROLE (from URL param ?role=admin)
+    // ─────────────────────────────────────────────────────────────────────────────
+    const urlParams = new URLSearchParams(window.location.search);
+    const userRole = (urlParams.get('role') || 'user').toLowerCase();
+    const isAdmin = userRole === 'admin';
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // FLOWS DATA
+    // ─────────────────────────────────────────────────────────────────────────────
+    const FLOWS = [
+      // ════════════════════════════════ CUSTOMER ════════════════════════════════
+      {
+        id: 'find-llm', group: 'customer', icon: '🔍',
+        title: 'Find a Service (AI Search)',
+        desc: 'Describe what you need in plain language — AI finds the right provider for you.',
+        role: 'c', roleLabel: '👤 Customer',
+        steps: [
+          {
+            title: 'Open Main Menu',
+            state: 'MAIN_MENU',
+            sub: 'Start from the Nestora bot main menu.',
+            what: 'The bot shows the main keyboard: Register Service, Find Service, Bookings, My Profile, Support.',
+            action: 'Tap <strong>🔍 Find Service</strong> to begin searching.',
+            buttons: [{ l: '🔍 Find Service', t: 'p' }],
+            tip: 'The AI understands natural language — type freely like you\'re texting a friend!'
+          },
+          {
+            title: 'Describe What You Need',
+            state: 'SEARCH_START',
+            sub: 'Type your requirement as a normal sentence.',
+            what: 'The bot prompts: "What service do you need?" Type a natural description including service type, area, and any specific requirements.',
+            action: 'Type something like: <em>"Need a plumber in Baner, Pune. Urgent pipe leak."</em> and send.',
+            buttons: [{ l: '🔄 New Search', t: '' }, { l: '🔙 Back to Menu', t: '' }],
+            tip: '<strong>60-second cooldown</strong> between searches. If you just searched, wait a moment.'
+          },
+          {
+            title: 'AI Processes Your Query',
+            state: 'SEARCH_START (AI processing)',
+            sub: '"🔍 Searching…" appears while AI extracts intent from your message.',
+            what: 'Gemini AI reads your text and extracts: service type, category, city/area, budget, and whether you want a verified provider. You see a loading message.',
+            action: 'Just wait — results appear in a few seconds. No action needed.',
+            tip: 'If the AI cannot extract enough info, it asks one follow-up question.'
+          },
+          {
+            title: 'AI Asks Follow-Up (if needed)',
+            state: 'SEARCH_LLM_FOLLOW_UP',
+            sub: 'The bot asks a clarifying question to refine the search.',
+            what: 'If your query was ambiguous (e.g. just "plumber"), the bot asks: "Which city are you in?" Answer naturally and the search continues automatically.',
+            action: 'Reply to the follow-up question. The search then runs.',
+            tip: 'This step is skipped entirely if your first message had enough details.'
+          },
+          {
+            title: 'View Search Results',
+            state: 'SEARCH_RESULTS',
+            sub: 'A list of matching service providers is shown as interactive cards.',
+            what: 'Each result shows: provider name, service type, years of experience, star rating, location, price range, and a direct Book button. Results are ordered by relevance, rating, and distance.',
+            action: 'Tap <strong>📅 Book</strong> on any provider card to start booking, or tap <strong>🔄 New Search</strong> to search again.',
+            buttons: [{ l: '📅 Book', t: 'p' }, { l: '🔄 New Search', t: '' }, { l: '🔙 Back to Menu', t: '' }],
+            tip: 'Providers with ✅ badge have completed KYC verification — they are identity-verified.'
+          }
+        ]
+      },
+
+      {
+        id: 'find-v2', group: 'customer', icon: '🗺️',
+        title: 'Find a Service (Guided)',
+        desc: 'Step-by-step guided search — pick category, type, location, and see results.',
+        role: 'c', roleLabel: '👤 Customer',
+        steps: [
+          {
+            title: 'Start Guided Search',
+            state: 'MAIN_MENU',
+            sub: 'The guided search walks you through picking the service step by step.',
+            what: 'Great if you\'re unsure how to describe what you need. Instead of typing, you tap from menus.',
+            action: 'Tap <strong>🔍 Find Service</strong> from the main menu.',
+            buttons: [{ l: '🔍 Find Service', t: 'p' }]
+          },
+          {
+            title: 'Step 1 — Pick a Category',
+            state: 'SEARCH_V2_CATEGORY',
+            sub: 'Choose the broad category your service falls under.',
+            what: 'A grid of categories appears — each with an emoji icon for quick recognition. Examples: Household Maintenance 🔧, Health & Wellness 🏥, Education 📚, Beauty & Grooming 💄.',
+            action: 'Tap the category that matches your need.',
+            buttons: [{ l: '🔙 Back to Menu', t: '' }, { l: '⏏️ Exit', t: '' }]
+          },
+          {
+            title: 'Step 2 — Pick Service Type',
+            state: 'SEARCH_V2_SERVICE_TYPE',
+            sub: 'Choose the specific service within the selected category.',
+            what: 'All service types under your chosen category appear — e.g. under Household Maintenance: Plumber, Electrician, AC Repair, Carpenter, Painter…',
+            action: 'Tap the specific service you need.',
+            buttons: [{ l: '🔙 Back to Categories', t: '' }, { l: '⏏️ Exit', t: '' }]
+          },
+          {
+            title: 'Step 3 — Share Your Location',
+            state: 'SEARCH_V2_LOCATION',
+            sub: 'Let the bot know where you are to find nearby providers.',
+            what: 'Two options:\n• <strong>📍 Share My Location</strong> — Telegram shares your GPS. Finds providers within a radius and shows distance.\n• <strong>✏️ Enter Manually</strong> — Type your city/area name. Uses city-matching.',
+            action: 'Tap 📍 Share My Location for best results, or type your city name.',
+            buttons: [{ l: '📍 Share My Location', t: 'p' }, { l: '✏️ Enter Manually', t: '' }, { l: '🔙 Back', t: '' }],
+            tip: 'GPS search is more accurate and shows distance to each provider.'
+          },
+          {
+            title: 'Step 4 — Describe Requirements',
+            state: 'SEARCH_V2_PROMPT',
+            sub: 'Add any specific preferences to refine results.',
+            what: 'Type any extra requirements — "under ₹500", "urgent today", "experienced only". This filters the results further. You can also skip to see all providers.',
+            action: 'Type your requirements or tap Skip.',
+            tip: 'You can skip this step to browse all available providers in your area.'
+          },
+          {
+            title: 'View Results & Book',
+            state: 'SEARCH_V2_RESULTS',
+            sub: 'Browse the filtered list and book the provider you like.',
+            what: 'Provider cards show: name, experience, rating, distance (if GPS was used), price, and a Book button. Tap any card to start the booking flow.',
+            action: 'Tap <strong>📅 Book</strong> on the provider you want.',
+            buttons: [{ l: '📅 Book', t: 'p' }, { l: '🔄 New Search', t: '' }]
+          }
+        ]
+      },
+
+      {
+        id: 'book-service', group: 'customer', icon: '📅',
+        title: 'Book a Service',
+        desc: 'After finding a provider, go through the booking confirmation and location steps.',
+        role: 'c', roleLabel: '👤 Customer',
+        steps: [
+          {
+            title: 'Review Price & Policy',
+            state: 'Pre-booking preview',
+            sub: 'Before confirming, you see the full price estimate and cancellation policy.',
+            what: 'A preview card shows: provider name, service, estimated fee, and their trust score badge 🛡️. No booking is created yet — this is just a preview to inform you.',
+            action: 'Read carefully. Tap <strong>✅ Confirm Booking</strong> to proceed.',
+            buttons: [{ l: '✅ Confirm Booking', t: 's' }, { l: '❌ Cancel', t: 'd' }],
+            tip: 'The 🛡️ trust score reflects the provider\'s past performance — more completed bookings = higher score.'
+          },
+          {
+            title: 'Booking Sent (REQUESTED)',
+            state: 'REQUESTED',
+            sub: 'Your request is sent. Waiting for the provider to accept.',
+            what: 'Booking is created with status REQUESTED. The provider is notified. You see a booking card with a Cancel button. Wait for the provider to accept or decline.',
+            action: 'Wait for the provider\'s response. You\'ll get a notification.',
+            buttons: [{ l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'Cancelling at REQUESTED stage is <strong>100% free</strong> — no charges apply.'
+          },
+          {
+            title: 'Provider Accepted (ACCEPTED)',
+            state: 'ACCEPTED',
+            sub: 'Great! The provider accepted your booking.',
+            what: 'You\'re notified that the provider accepted. The bot now asks: "Is this a home service?" — meaning, will the provider come to you, or will you go to them?',
+            action: 'Tap <strong>🏠 Yes, home service</strong> if the provider comes to you, or <strong>🚫 No, I\'ll go there</strong> if you\'re going to them.',
+            buttons: [{ l: '🏠 Yes, home service', t: 'p' }, { l: '🚫 No, I\'ll go there', t: '' }, { l: '❌ Cancel Booking', t: 'd' }]
+          },
+          {
+            title: 'Share Your Location (Home Service)',
+            state: 'BOOKING_AWAIT_LOCATION',
+            sub: 'For home service: share your address so the provider can find you.',
+            what: 'The bot prompts you to share your live GPS location or type your address. This is sent to the provider so they can navigate to you.',
+            action: 'Tap <strong>📍 Share Location</strong> or type your address.',
+            buttons: [{ l: '📍 Share Location', t: 'p' }, { l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'Skipped entirely if you chose "No, I\'ll go there" — booking goes straight to CONFIRMED.'
+          },
+          {
+            title: 'Add Address Details',
+            state: 'BOOKING_AWAIT_ADDRESS',
+            sub: 'Add flat number, floor, and landmark for easier navigation.',
+            what: 'After GPS, the bot asks for additional details: flat/room number, floor, and any nearby landmark. This helps the provider find you quickly.',
+            action: 'Type details like "Flat 4B, 2nd Floor, near Reliance Fresh" or tap Skip.',
+            buttons: [{ l: '⏭️ Skip', t: '' }, { l: '❌ Cancel Booking', t: 'd' }]
+          },
+          {
+            title: 'Booking Confirmed (CONFIRMED)',
+            state: 'CONFIRMED',
+            sub: 'Your booking is confirmed. Everything is set.',
+            what: 'Both you and the provider see the booking as CONFIRMED. For home service: the provider taps "Start Travel" when heading to you. For at-location: you tap "Start Heading" when you leave.',
+            action: 'Wait for the travel phase to begin. You\'ll be notified.',
+            buttons: [{ l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'Cancelling at CONFIRMED stage: <strong>5% cancellation fee</strong> (min ₹20, max ₹100).'
+          }
+        ]
+      },
+
+      {
+        id: 'active-journey', group: 'customer', icon: '🚀',
+        title: 'Active Booking Journey',
+        desc: 'The travel, arrival, OTP verification, and service execution steps — shared by both Customer and Provider.',
+        role: 'b', roleLabel: '👤🔧 Both',
+        steps: [
+          {
+            title: 'Travel Begins',
+            state: 'PROVIDER_EN_ROUTE / CUSTOMER_EN_ROUTE',
+            sub: 'Whoever is traveling taps "Start Travel" or "Start Heading".',
+            what: 'For home service: <strong>Provider</strong> taps 🚗 Start Travel → status = PROVIDER_EN_ROUTE.\nFor at-location: <strong>Customer</strong> taps 🚶 Start Heading → status = CUSTOMER_EN_ROUTE.\n\nThe other party is notified.',
+            action: '<strong>Provider (home):</strong> Tap 🚗 Start Travel.\n<strong>Customer (at-location):</strong> Tap 🚶 Start Heading.',
+            buttons: [{ l: '🚗 Start Travel', t: 'p' }, { l: '🚶 Start Heading', t: 'p' }, { l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'Cancelling while en-route incurs a <strong>15% fee</strong> for customers, <strong>10%</strong> for providers.'
+          },
+          {
+            title: 'Arrived — OTP Generated',
+            state: 'PROVIDER_ARRIVED / CUSTOMER_ARRIVED',
+            sub: 'When the traveling party arrives, tap Arrived. A secure OTP is generated.',
+            what: 'Tap Arrived when you reach the destination. The system generates a secure 4-digit OTP:\n• <strong>Customer sees the OTP</strong> on their screen.\n• <strong>Provider must enter the OTP</strong> to prove they are at the right location.\n\nThis is a security checkpoint — prevents fraud.',
+            action: '<strong>Provider:</strong> Tap 📍 Arrived → then ask the customer for the OTP.\n<strong>Customer:</strong> Share the OTP verbally with the provider.',
+            buttons: [{ l: '📍 Arrived', t: 'p' }, { l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'The OTP proves both parties are physically at the same location — it\'s Nestora\'s security handshake.'
+          },
+          {
+            title: 'Provider Enters OTP',
+            state: 'BOOKING_AWAIT_OTP',
+            sub: 'Provider types the 4-digit OTP the customer told them.',
+            what: 'The bot prompts the provider to "Enter the 4-digit OTP". The provider types the code. If correct, the booking is verified. If wrong, they can try again.',
+            action: '<strong>Provider:</strong> Type the 4-digit OTP and send it.',
+            tip: 'Multiple failed OTP attempts? Contact Nestora support via the Support button.'
+          },
+          {
+            title: 'OTP Verified — Start Service',
+            state: 'OTP_VERIFIED',
+            sub: 'OTP matched! You\'re both at the location. Service can begin.',
+            what: 'Both parties see the OTP verified confirmation. The provider\'s card shows a "Start Service" button. Everything is confirmed — the job is ready to begin.',
+            action: '<strong>Provider:</strong> Tap <strong>⚙️ Start Service</strong> when you\'re ready.',
+            buttons: [{ l: '⚙️ Start Service', t: 'p' }, { l: '❌ Cancel Booking', t: 'd' }]
+          },
+          {
+            title: 'Service in Progress',
+            state: 'SERVICE_STARTED',
+            sub: 'The service is actively happening. Both parties see this status.',
+            what: 'The booking is in SERVICE_STARTED. The provider performs the work. Once complete, they tap "Service Completed". The customer should be present and ready for payment.',
+            action: '<strong>Provider:</strong> Complete the service, then tap <strong>✅ Service Completed</strong>.',
+            buttons: [{ l: '✅ Service Completed', t: 's' }, { l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'Cancelling at this stage: <strong>50% fee for customers, 25% for providers</strong> — the highest fee tier.'
+          }
+        ]
+      },
+
+      {
+        id: 'payment', group: 'customer', icon: '💳',
+        title: 'Payment Flow',
+        desc: 'After the service is done, the customer pays via UPI and Admin settles the payment.',
+        role: 'c', roleLabel: '👤 Customer',
+        steps: [
+          {
+            title: 'Service Complete — Pay Now',
+            state: 'PAYMENT_PENDING',
+            sub: 'Provider marked service complete. Your booking card now shows the payment button.',
+            what: 'Your booking card updates to show the payment amount and a <strong>💳 Pay via UPI App</strong> button. The provider sees a passive message: "Customer is paying via UPI. You will be notified when settled."',
+            action: 'Tap <strong>💳 Pay via UPI App</strong> on your booking card.',
+            buttons: [{ l: '💳 Pay via UPI App', t: 'p' }]
+          },
+          {
+            title: 'Nestora Payment Page Opens',
+            state: 'PAYMENT_PENDING (pay.html)',
+            sub: 'The Nestora payment page opens in Telegram\'s in-app browser.',
+            what: 'The page shows:\n• Amount to pay\n• Nestora\'s UPI ID (copy button)\n• Nestora\'s Phone number (copy button)\n• Buttons to open Google Pay / PhonePe / any UPI app\n\nChoose your preferred method.',
+            action: 'Tap <strong>💳 Pay with UPI ID</strong> or <strong>📞 Pay with Phone Number</strong>.',
+            buttons: [{ l: '💳 Pay with UPI ID', t: 'p' }, { l: '📞 Pay with Phone Number', t: 'p' }],
+            tip: 'The "Payment Sent?" popup only appears when you return from your UPI app — pay first, then come back.'
+          },
+          {
+            title: 'Pay in Your UPI App',
+            state: 'In UPI app (Google Pay / PhonePe / etc.)',
+            sub: 'Your UPI app opens with payment details pre-filled.',
+            what: 'Complete the payment in your UPI app (Google Pay, PhonePe, Paytm, etc.). Note the success or failure message. Then switch back to the Nestora payment page.',
+            action: 'Complete payment in your UPI app, then return to Nestora.',
+            tip: 'If payment fails in the UPI app, go back and try again. Booking stays in PAYMENT_PENDING.'
+          },
+          {
+            title: 'Confirm Payment',
+            state: 'PAYMENT_PENDING (confirmation overlay)',
+            sub: 'When you return from the UPI app, a confirmation popup appears.',
+            what: 'The overlay shows: "Payment Sent?" with two choices:\n• ✅ Yes, I Paid Successfully → deep-links you back to the bot\n• ❌ No, Payment Failed → goes back to payment options to retry',
+            action: 'Tap <strong>✅ Yes, I Paid Successfully</strong> if your payment went through.',
+            buttons: [{ l: '✅ Yes, I Paid Successfully', t: 's' }, { l: '❌ No, Payment Failed', t: 'd' }]
+          },
+          {
+            title: 'Confirm in Bot',
+            state: 'Awaiting admin settlement',
+            sub: 'Back in the bot — confirm payment done so Nestora Admin is notified.',
+            what: 'After tapping "Yes, I Paid", you\'re redirected to the bot via deep link. Your booking card shows a <strong>✅ Confirm Payment Done</strong> button. Admin is automatically notified to verify the UPI transaction.',
+            action: 'Tap <strong>✅ Confirm Payment Done</strong> on your updated booking card.',
+            buttons: [{ l: '✅ Confirm Payment Done', t: 's' }]
+          },
+          {
+            title: 'Admin Settles — Booking Closed',
+            state: 'PAID → CLOSED',
+            sub: 'Nestora Admin reviews the UPI transaction and settles payment.',
+            what: 'Admin sees your booking details and taps "Settle Payment". When settled:\n• Your wallet is debited 100% of the fee\n• Provider gets 80% credited to their wallet\n• Nestora keeps 20% commission\n\nYou receive: "✅ Payment confirmed! Booking closed."',
+            action: 'Wait for the settlement notification. Nothing more to do.',
+            tip: 'If Admin flags payment as not received, your booking returns to PAYMENT_PENDING and you can pay again.'
+          }
+        ]
+      },
+
+      // ════════════════════════════════ PROVIDER ════════════════════════════════
+      {
+        id: 'register-service', group: 'provider', icon: '🔧',
+        title: 'Register a Service',
+        desc: 'Create your service provider listing so customers can discover and book you.',
+        role: 'p', roleLabel: '🔧 Provider',
+        steps: [
+          {
+            title: 'Check Prerequisites',
+            state: 'MAIN_MENU',
+            sub: 'Your account must be KYC-verified before registering a service.',
+            what: 'To register a service, you must have:\n✅ KYC verified (Aadhaar + Selfie + UPI)\n✅ Name, phone, email set\n✅ Profile photo uploaded\n\nIf any are missing, the bot redirects you to complete them first.',
+            action: 'Tap <strong>🔧 Register Service</strong> from the main menu.',
+            buttons: [{ l: '🔧 Register Service', t: 'p' }],
+            tip: 'Go to My Profile → 🔐 Start Verification to complete KYC first.'
+          },
+          {
+            title: 'Select Service Category',
+            state: 'WAITING_FOR_CATEGORY',
+            sub: 'Choose which category your service belongs to.',
+            what: 'A grid of categories appears: Household Maintenance 🔧, Health & Wellness 🏥, Education 📚, Beauty & Grooming 💄, etc. You can register services in multiple categories by repeating the flow.',
+            action: 'Tap the category that matches your service.',
+            buttons: [{ l: '🔙 Back to Menu', t: '' }, { l: '⏏️ Exit', t: '' }]
+          },
+          {
+            title: 'Select Service Type',
+            state: 'WAITING_FOR_SERVICE_TYPE',
+            sub: 'Choose the specific service type within your category.',
+            what: 'Service types for the chosen category appear — e.g. Plumber, Electrician, AC Repair, Carpenter. Services you\'ve already registered are filtered out so you won\'t see duplicates.',
+            action: 'Tap your specific service type.',
+            buttons: [{ l: '🔙 Back to Categories', t: '' }]
+          },
+          {
+            title: 'Answer Service Attributes',
+            state: 'WAITING_FOR_ATTRIBUTE',
+            sub: 'Answer specific questions about your service — one at a time.',
+            what: 'The bot asks questions specific to your service type (set by Nestora admin). Examples:\n• "Years of experience in AC Repair?"\n• "Which brands do you service?" (multi-select checkboxes)\n• "Do you provide genuine spare parts?" (Yes/No)\n\nEach question is asked one by one.',
+            action: 'Answer each question as prompted. Tap multi-select checkboxes to toggle options, then Done.',
+            tip: 'These attributes appear on your profile card when customers search — detailed answers attract more bookings!'
+          },
+          {
+            title: 'Set Your Base Price',
+            state: 'WAITING_FOR_PRICING',
+            sub: 'Enter your starting service price in ₹.',
+            what: 'Type your base/starting price as a number (e.g. 500 for ₹500). This shows as "Starting from ₹500" on your profile card. You can negotiate the final price with customers.',
+            action: 'Type your base price as a plain number (e.g. 500) and send.'
+          },
+          {
+            title: 'Is Your Price Negotiable?',
+            state: 'WAITING_FOR_NEGOTIABLE',
+            sub: 'Tell customers if your price is flexible or fixed.',
+            what: 'Tap Yes if you\'re open to negotiation, or No if your quoted price is firm. This is shown as a tag on your profile card so customers know upfront.',
+            action: 'Tap Yes or No.',
+            buttons: [{ l: 'Yes', t: 'p' }, { l: 'No', t: '' }, { l: '⏭️ Skip', t: '' }]
+          },
+          {
+            title: 'Upload Portfolio Photos',
+            state: 'WAITING_FOR_MEDIA',
+            sub: 'Upload photos of your past work to attract more customers.',
+            what: 'Send photos showing examples of your completed work (e.g. repaired appliances, installed fixtures, finished repairs). These appear in your profile gallery.',
+            action: 'Send one or more photos, or tap Skip to skip.',
+            buttons: [{ l: '⏭️ Skip', t: '' }],
+            tip: 'Portfolio photos significantly increase customer trust and booking rate — don\'t skip this!'
+          },
+          {
+            title: 'Set Your Service Location',
+            state: 'WAITING_FOR_GPS / WAITING_FOR_STATE_SELECTION',
+            sub: 'Tell Nestora where you operate so local customers can find you.',
+            what: 'Two options:\n• <strong>Share GPS</strong> — Most accurate. Gives you a precise radius on the map.\n• <strong>Manual</strong> — Select your State from a list, then your City (shown 6 at a time with ◀ Previous / Next ▶ pagination).',
+            action: 'Share your GPS location or select State → City manually.',
+            buttons: [{ l: '📍 Share My Location', t: 'p' }, { l: '✏️ Enter Location', t: '' }, { l: '🔙 Back', t: '' }]
+          },
+          {
+            title: 'Years of Experience',
+            state: 'WAITING_FOR_EXPERIENCE',
+            sub: 'How long have you been doing this specific type of service?',
+            what: 'Type the number of years of experience you have (e.g. 5 for 5 years). This is displayed prominently on your profile card — more experience = more customer trust.',
+            action: 'Type a number (e.g. 5) and send.'
+          },
+          {
+            title: 'Write Your Service Description',
+            state: 'WAITING_FOR_DESCRIPTION',
+            sub: 'A brief pitch about your service and what makes you the right choice.',
+            what: 'Type 2–5 sentences describing your service, specialty, and what sets you apart. This is displayed on your listing and is your key opportunity to sell yourself.',
+            action: 'Type your description and send.',
+            tip: 'Mention specific specializations (e.g. "specializes in split AC installation") or certifications to stand out.'
+          },
+          {
+            title: 'Review & Confirm',
+            state: 'REGISTRATION_REVIEW',
+            sub: 'Review everything you\'ve entered before publishing your listing.',
+            what: 'A summary card shows all your entries. If anything is wrong, go back and edit it. Once you confirm, your listing goes live and customers can find you immediately.',
+            action: 'Tap <strong>✅ Confirm & Save</strong> to publish, or <strong>✏️ Edit Details</strong> to fix anything.',
+            buttons: [{ l: '✅ Confirm & Save', t: 's' }, { l: '✏️ Edit Details', t: 'w' }, { l: '❌ Cancel', t: 'd' }]
+          },
+          {
+            title: 'Listing Published!',
+            state: 'REGISTRATION_CONFIRMED',
+            sub: '🎉 Your service is now live on Nestora!',
+            what: 'Congratulations! Your listing is published and active. Customers in your area can now find and book you. You\'ll receive Telegram notifications for every new booking request.',
+            action: 'Return to the main menu. Watch your Bookings tab for incoming requests!',
+            tip: 'Register multiple service types by repeating this flow from the main menu.'
+          }
+        ]
+      },
+
+      {
+        id: 'handle-booking', group: 'provider', icon: '📬',
+        title: 'Handle a Booking Request',
+        desc: 'When a customer books you — from accepting the request to completing the service.',
+        role: 'p', roleLabel: '🔧 Provider',
+        steps: [
+          {
+            title: 'New Request Notification',
+            state: 'PROVIDER_INBOX',
+            sub: 'A customer has requested your service.',
+            what: 'You receive a notification showing: customer name, service type, problem description, requested time, and estimated fee. Two inline buttons appear: Accept and Decline.',
+            action: 'Review the details. Tap <strong>✅ Accept Request</strong> or <strong>❌ Decline</strong>.',
+            buttons: [{ l: '✅ Accept Request', t: 's' }, { l: '❌ Decline', t: 'd' }],
+            tip: 'Accepting bookings and responding quickly improves your trust score. Slow/no responses reduce it.'
+          },
+          {
+            title: 'Request Accepted',
+            state: 'ACCEPTED',
+            sub: 'You accepted! The customer is now confirming home-service details.',
+            what: 'The customer is being asked if it\'s a home service and to share their address. Your booking card shows ACCEPTED status. Wait for the customer to complete their steps.',
+            action: 'Wait — you\'ll be notified when they confirm and booking becomes CONFIRMED.',
+            buttons: [{ l: '❌ Cancel Booking', t: 'd' }],
+            tip: 'Free cancellation for providers at this stage — no fee applies yet.'
+          },
+          {
+            title: 'Start Traveling (Home Service)',
+            state: 'CONFIRMED → PROVIDER_EN_ROUTE',
+            sub: 'Head to the customer\'s location and tap Start Travel.',
+            what: 'Your booking card shows the customer\'s full address. When you\'re ready to leave, tap Start Travel. The customer receives a notification that you\'re on your way.',
+            action: 'Tap <strong>🚗 Start Travel</strong> when you begin heading to the customer.',
+            buttons: [{ l: '🚗 Start Travel', t: 'p' }, { l: '❌ Cancel Booking', t: 'd' }]
+          },
+          {
+            title: 'Arrive & Get OTP',
+            state: 'PROVIDER_ARRIVED',
+            sub: 'You\'ve reached the customer. Tap Arrived to trigger OTP generation.',
+            what: 'Tap Arrived. A 4-digit OTP appears on the customer\'s screen. You must ask the customer for this OTP and enter it to verify the meeting — it\'s Nestora\'s security handshake.',
+            action: 'Tap <strong>📍 Arrived</strong>, then ask the customer for the OTP.',
+            buttons: [{ l: '📍 Arrived', t: 'p' }]
+          },
+          {
+            title: 'Enter Customer OTP',
+            state: 'BOOKING_AWAIT_OTP',
+            sub: 'The bot prompts you to enter the OTP the customer tells you.',
+            what: 'Ask the customer verbally for their 4-digit OTP. Type it into the bot. If correct, the booking advances to OTP_VERIFIED. If wrong, try again.',
+            action: 'Type the 4-digit OTP and send.',
+            tip: 'Having trouble? The customer can show you their screen. The OTP is displayed clearly.'
+          },
+          {
+            title: 'Start Service',
+            state: 'OTP_VERIFIED → SERVICE_STARTED',
+            sub: 'OTP verified! Begin the service.',
+            what: 'Both you and the customer see OTP verified confirmation. Tap Start Service to officially begin work. The booking status becomes SERVICE_STARTED.',
+            action: 'Tap <strong>⚙️ Start Service</strong> to begin.',
+            buttons: [{ l: '⚙️ Start Service', t: 'p' }]
+          },
+          {
+            title: 'Complete the Service',
+            state: 'SERVICE_STARTED → PAYMENT_PENDING',
+            sub: 'Finish the work and mark it complete.',
+            what: 'Once you\'ve finished the job, tap Service Completed. The booking moves to PAYMENT_PENDING. The customer immediately sees a payment card on their screen.',
+            action: 'Tap <strong>✅ Service Completed</strong> when your work is fully done.',
+            buttons: [{ l: '✅ Service Completed', t: 's' }],
+            tip: 'Your earnings will be settled by Admin after the customer pays. You\'ll receive a notification.'
+          },
+          {
+            title: 'Earnings Settlement',
+            state: 'PAYMENT_PENDING → CLOSED',
+            sub: 'Your part is done — wait for Admin to settle your earnings.',
+            what: 'The customer pays via UPI. Nestora Admin verifies the transaction and settles. You receive:\n"💰 Earnings Credited! ₹[amount] has been credited to your wallet."\n\nYou receive 80% of the service fee. Nestora keeps 20% commission.',
+            action: 'No action needed — wait for the settlement notification in Telegram.',
+            tip: 'View your wallet balance in My Profile. All transactions are logged with booking reference.'
+          }
+        ]
+      },
+
+      // ════════════════════════════════ KYC ═════════════════════════════════════
+      {
+        id: 'kyc', group: 'kyc', icon: '🔑',
+        title: 'KYC Verification',
+        desc: 'One-time identity verification required before registering services or booking. Done via Aadhaar + Live Selfie.',
+        role: 'k', roleLabel: '🔑 All Users',
+        steps: [
+          {
+            title: 'Why You Need KYC',
+            state: 'MY_PROFILE',
+            sub: 'KYC ensures all Nestora users are real, verified individuals.',
+            what: 'KYC (Know Your Customer) is mandatory before:\n• Registering a service as a provider\n• Using advanced features\n\nBefore starting, make sure your profile has:\n✅ Name set\n✅ Phone set\n✅ Email verified\n✅ Profile photo uploaded',
+            action: 'Go to <strong>👤 My Profile → 🔐 Start Verification</strong>.',
+            buttons: [{ l: '🔐 Start Verification', t: 'p' }],
+            tip: 'KYC is a <strong>one-time process</strong>. Once verified, your ✅ badge is permanent.'
+          },
+          {
+            title: 'Step 1 — Enter Aadhaar Number',
+            state: 'KYC_AADHAAR_NUMBER',
+            sub: 'Type your 12-digit Aadhaar card number.',
+            what: 'The bot prompts: "Enter your 12-digit Aadhaar number". Type it without spaces or dashes. It\'s validated using the Verhoeff checksum — transposed digits are automatically caught.',
+            action: 'Type your 12-digit Aadhaar number (e.g. 123456789012) and send.',
+            tip: '⚠️ You get <strong>2 attempts</strong>. On the 3rd wrong attempt, KYC resets and you return to the main menu.'
+          },
+          {
+            title: 'Step 2 — Aadhaar Card Photo',
+            state: 'KYC_AADHAAR_IMAGE',
+            sub: 'Take a live photo of your physical Aadhaar card.',
+            what: 'Tap "🤳 Live Capture" to open the camera inside Telegram. Take a clear photo of your Aadhaar card (front side showing your name, DOB, number, and photo).\n\n⚠️ Gallery photos and screenshots are rejected — must be taken live.',
+            action: 'Tap <strong>🤳 Live Capture</strong> and photograph your Aadhaar card.',
+            buttons: [{ l: '🤳 Live Capture', t: 'p' }],
+            tip: '<strong>Gemini AI checks:</strong> Is it an Aadhaar? Is the number readable? Does the number match what you entered? Does the name match your profile?'
+          },
+          {
+            title: 'Step 3 — Live Selfie',
+            state: 'KYC_LIVE_SELFIE',
+            sub: 'Take a live selfie for face-matching against your Aadhaar photo.',
+            what: 'Tap "🤳 Live Capture" again. This time, take a clear selfie of your face. Gemini AI compares your face to the photo on your Aadhaar card to verify identity. Photos-of-photos are also detected and rejected.',
+            action: 'Tap <strong>🤳 Live Capture</strong> and take a clear, well-lit selfie.',
+            buttons: [{ l: '🤳 Live Capture', t: 'p' }],
+            tip: 'Good lighting is essential! Face the light source, avoid sunglasses or hats. Make your face fully visible.'
+          },
+          {
+            title: 'Step 4 — Enter UPI ID',
+            state: 'KYC_UPI_ID',
+            sub: 'Enter your UPI ID or UPI-linked phone number.',
+            what: 'Type your UPI ID (e.g. yourname@paytm) or your 10-digit UPI-linked phone number. This is used:\n• For identity confirmation\n• For providers: your earnings payout account',
+            action: 'Type your UPI ID or phone number and send.',
+            tip: 'Providers: Make sure this is the UPI account where you want earnings credited!'
+          },
+          {
+            title: '✅ Verification Complete!',
+            state: 'VERIFIED',
+            sub: 'Your identity is verified. Your ✅ badge is now active on your profile.',
+            what: 'You receive: "🎉 KYC Complete! You are now verified on Nestora."\n\nYour profile shows ✅ verified badge. As a provider, your listing is marked verified — customers can see and trust you.',
+            action: 'Return to the main menu. Your full account is now unlocked!',
+            tip: 'To update KYC details later: My Profile → Update Profile → 🔄 Request KYC Edit.'
+          }
+        ]
+      },
+
+      // ════════════════════════════════ PROFILE ═════════════════════════════════
+      {
+        id: 'update-profile', group: 'profile', icon: '👤',
+        title: 'Update Your Profile',
+        desc: 'Edit your name, phone, email, location, profile picture, or UPI ID.',
+        role: 'k', roleLabel: '🔑 All Users',
+        steps: [
+          {
+            title: 'Open Profile Settings',
+            state: 'MY_PROFILE',
+            sub: 'Access your profile from the main menu.',
+            what: 'Your profile card shows current details: name, phone, email, location, verification status, and wallet balance. From here you can Edit Listing, Update Profile, or start KYC.',
+            action: 'Tap <strong>👤 My Profile</strong> from the main menu.',
+            buttons: [{ l: '👤 My Profile', t: 'p' }]
+          },
+          {
+            title: 'Open Update Profile Menu',
+            state: 'UPDATE_PROFILE_MENU',
+            sub: 'A menu shows all the fields you can update.',
+            what: 'Available update options:\n• ✏️ Update Name\n• 📱 Update Phone\n• ✉️ Update Email\n• 📍 Update Location\n• 🖼 Update Profile Pic\n• 💳 Update UPI Number\n• 🔄 Request KYC Edit (only if already verified)',
+            action: 'Tap <strong>2️⃣ Update Profile</strong> from the profile settings keyboard.',
+            buttons: [{ l: '2️⃣ Update Profile', t: 'p' }, { l: '🔙 Back', t: '' }, { l: '⏏️ Exit', t: '' }]
+          },
+          {
+            title: 'Update Name',
+            state: 'UPDATE_PROFILE_NAME',
+            sub: 'Change your display name on Nestora.',
+            what: 'Tap "✏️ Update Name". The bot prompts: "Enter your new name". Type and send your new full name. It appears on your profile card and booking notifications.',
+            action: 'Tap ✏️ Update Name → type your new name → send.',
+            buttons: [{ l: '✏️ Update Name', t: '' }]
+          },
+          {
+            title: 'Update Phone Number',
+            state: 'UPDATE_PROFILE_COUNTRY_CODE → UPDATE_PROFILE_PHONE',
+            sub: 'Two-step: select country code, then enter phone number.',
+            what: 'First, select your country (India +91, US +1, UAE +971). Then type your new phone number. The bot validates the format before saving.',
+            action: 'Tap 📱 Update Phone → select country → type number → send.',
+            buttons: [{ l: '📱 Update Phone', t: '' }]
+          },
+          {
+            title: 'Update Email (with OTP)',
+            state: 'UPDATE_PROFILE_EMAIL → UPDATE_PROFILE_EMAIL_OTP',
+            sub: 'Two-step: enter email, then verify with OTP sent to that email.',
+            what: 'Type your new email address. The bot sends a 6-digit OTP to that email. Enter the OTP to confirm ownership and save the new email.',
+            action: 'Tap ✉️ Update Email → type email → check your inbox → enter OTP.',
+            buttons: [{ l: '✉️ Update Email', t: '' }]
+          },
+          {
+            title: 'Update Location',
+            state: 'UPDATE_PROFILE_LOCATION',
+            sub: 'Change the city/area where you operate or are based.',
+            what: 'Share your live GPS location or type your location manually. This affects: your search visibility radius (as a provider) and the area shown on your profile.',
+            action: 'Tap 📍 Update Location → share GPS or type address.',
+            buttons: [{ l: '📍 Update Location', t: '' }, { l: '📍 Share My Location', t: 'p' }]
+          },
+          {
+            title: 'Update Profile Picture',
+            state: 'UPDATE_PROFILE_PIC',
+            sub: 'Set a new profile photo.',
+            what: 'Send a clear photo of yourself. This becomes your Nestora profile picture, visible on your listing card and in booking notifications. For KYC users, it may be used for face-matching.',
+            action: 'Tap 🖼 Update Profile Pic → send a photo.',
+            buttons: [{ l: '🖼 Update Profile Pic', t: '' }]
+          },
+          {
+            title: 'Update UPI Number',
+            state: 'UPDATE_PROFILE_UPI_ID',
+            sub: 'Change your UPI ID or phone for payment.',
+            what: 'Type your new UPI ID (e.g. name@paytm) or 10-digit UPI phone number. Providers: this is the account where you\'ll receive earnings from settled bookings.',
+            action: 'Tap 💳 Update UPI Number → type new ID/phone → send.',
+            buttons: [{ l: '💳 Update UPI Number', t: '' }]
+          }
+        ]
+      },
+
+      {
+        id: 'edit-listing', group: 'profile', icon: '📝',
+        title: 'Edit Your Listing',
+        desc: 'Update title, description, price, location, photos, or service attributes on your existing listing.',
+        role: 'p', roleLabel: '🔧 Provider',
+        steps: [
+          {
+            title: 'Open Edit Listing',
+            state: 'EDIT_LISTING_SELECT',
+            sub: 'Go to My Profile → 1️⃣ Edit Listing.',
+            what: 'If you have multiple service listings, a list appears so you can pick which one to edit. Each listing shows the service type and current status.',
+            action: 'Tap <strong>👤 My Profile → 1️⃣ Edit Listing</strong>.',
+            buttons: [{ l: '1️⃣ Edit Listing', t: 'p' }]
+          },
+          {
+            title: 'Choose What to Edit',
+            state: 'EDIT_LISTING_MENU',
+            sub: 'An inline keyboard shows all editable fields.',
+            what: 'Available edit options (inline buttons):\n• Title / Headline\n• Description\n• Price\n• Location\n• Portfolio Photos\n• Service Attributes (custom questions)\n\nTap any to update that specific field.',
+            action: 'Tap the field you want to update from the inline keyboard.'
+          },
+          {
+            title: 'Edit and Save',
+            state: 'EDIT_LISTING_TITLE / EDIT_LISTING_DESC / etc.',
+            sub: 'For each field: the bot prompts for the new value, you type it, it saves instantly.',
+            what: 'Text fields (Title, Description): type the new value and send. Price: type the new amount. Location: share GPS or select state/city. Photos: send new images. Each change is saved immediately and customers see the update live.',
+            action: 'Type or select the new value as prompted. It saves automatically.',
+            tip: 'A compelling title and description directly impacts how many customers click on your listing!'
+          }
+        ]
+      },
+
+      // ════════════════════════════════ ADMIN ═══════════════════════════════════
+      {
+        id: 'admin-users', group: 'admin', icon: '👥',
+        title: 'Manage Users',
+        desc: 'View all users, search by name, toggle roles, and manage account status.',
+        role: 'a', roleLabel: '🛡️ Admin Only', adminOnly: true,
+        steps: [
+          {
+            title: 'Open User Management',
+            state: 'ADMIN_USER_LIST',
+            sub: 'View all registered users in a paginated list.',
+            what: 'From the Admin main menu, tap Manage Users. A paginated list of all users appears, showing their names, roles, verification status, and join date.',
+            action: 'Tap <strong>👥 Manage Users</strong> from the Admin menu.',
+            buttons: [{ l: '👥 Manage Users', t: 'p' }]
+          },
+          {
+            title: 'Search for a User',
+            state: 'ADMIN_USER_SEARCH',
+            sub: 'Find a specific user by name, username, or phone.',
+            what: 'Type the user\'s name, Telegram username, or phone number to search. The system returns all matching users. Tap one to view their full profile.',
+            action: 'Type the search term and send.',
+            buttons: [{ l: '🔙 Back', t: '' }]
+          },
+          {
+            title: 'Manage a Specific User',
+            state: 'ADMIN_USER_EDIT',
+            sub: 'View and take actions on a specific user\'s account.',
+            what: 'Tapping a user shows their complete profile: name, email, phone, role, verification status, account status (active/suspended), join date.\n\nAdmin actions:\n• 🔄 Toggle Role — switch between User/Provider/Admin roles\n• 🚫 Deactivate / ✅ Activate — suspend or restore access',
+            action: 'Tap a user from the list, then tap the desired action button.',
+            buttons: [{ l: '🔄 Toggle Role', t: 'w' }, { l: '🚫 Deactivate', t: 'd' }, { l: '✅ Activate', t: 's' }]
+          }
+        ]
+      },
+
+      {
+        id: 'admin-catalog', group: 'admin', icon: '📁',
+        title: 'Manage Catalog',
+        desc: 'Add and edit service categories, service types, and the attribute templates shown during provider registration.',
+        role: 'a', roleLabel: '🛡️ Admin Only', adminOnly: true,
+        steps: [
+          {
+            title: 'Open Catalog Management',
+            state: 'ADMIN_CATALOG_MENU',
+            sub: 'The catalog defines all services that providers can register and customers can search.',
+            what: 'Tap Manage Categories or Manage Service Types from the Admin menu. You control:\n• <strong>Categories</strong> — broad groups (e.g. Household Maintenance)\n• <strong>Service Types</strong> — specific services (e.g. Plumber, AC Repair)\n• <strong>Attribute Templates</strong> — custom questions asked during registration',
+            action: 'Tap <strong>📁 Manage Categories</strong> or <strong>🏷 Manage Service Types</strong>.',
+            buttons: [{ l: '📁 Manage Categories', t: 'p' }, { l: '🏷 Manage Service Types', t: 'p' }]
+          },
+          {
+            title: 'Add a Category (5 steps)',
+            state: 'ADMIN_CAT_ADD_NAME → ADMIN_CAT_ADD_CONFIRM',
+            sub: '5-step guided flow to add a new service category.',
+            what: 'Step by step:\n1. <strong>Name</strong> — e.g. "Household Maintenance"\n2. <strong>Emoji</strong> — e.g. 🔧\n3. <strong>Description</strong> — brief tagline\n4. <strong>Display Order</strong> — sort position (lower = shown first)\n5. <strong>Confirm & Save</strong>',
+            action: 'Follow each prompt in sequence.',
+            tip: 'Keep category names short and clear. They appear on the customer-facing search screen.'
+          },
+          {
+            title: 'Add a Service Type (8 steps)',
+            state: 'ADMIN_STYPE_PICK_CAT → ADMIN_STYPE_ADD_CONFIRM',
+            sub: '8-step flow to add a new service type within a category.',
+            what: 'Steps:\n1. Pick parent category\n2. Name (e.g. "Plumber")\n3. URL slug (e.g. "plumber")\n4. Emoji\n5. Description\n6. Verification Required (Yes/No)\n7. Display order\n8. Confirm & Save',
+            action: 'Follow each prompt in sequence.',
+            tip: 'Enabling "Verification Required" means only KYC-verified providers can list this service type.'
+          },
+          {
+            title: 'Add Attribute Templates',
+            state: 'ADMIN_ATTR_PICK_STYPE → ADMIN_ATTR_ADD_CONFIRM',
+            sub: 'Define the registration questions for a service type.',
+            what: 'Attribute templates are the custom questions asked when a provider registers a service type. Each attribute needs:\n• Key (internal ID)\n• Display Label (the question text)\n• Input Type: text / select / multiselect\n• Options (for select/multiselect only)\n• Required (Yes/No)\n• Searchable (appears as a filter for customers)\n• Display order',
+            action: 'Pick the service type, then follow the attribute prompts.',
+            tip: 'Well-designed attributes make your service types more searchable and help customers find the perfect provider.'
+          }
+        ]
+      },
+
+      {
+        id: 'admin-payment', group: 'admin', icon: '🏦',
+        title: 'Settle Payments',
+        desc: 'Admin reviews and settles customer payments — wallets are updated automatically on settlement.',
+        role: 'a', roleLabel: '🛡️ Admin Only', adminOnly: true,
+        steps: [
+          {
+            title: 'Payment Notification Received',
+            state: 'Awaiting Admin Action',
+            sub: 'When a customer confirms payment, Admin is automatically notified.',
+            what: 'Admin receives a Telegram notification containing:\n• Booking reference\n• Customer name & Provider name\n• Service type\n• Amount\n• Two action buttons',
+            action: 'Review the notification. Tap <strong>✅ Settle Payment</strong> or <strong>🚨 Flag as Not Received</strong>.',
+            buttons: [{ l: '✅ Settle Payment', t: 's' }, { l: '🚨 Flag as Not Received', t: 'd' }]
+          },
+          {
+            title: 'Settle the Payment',
+            state: 'PAID → CLOSED',
+            sub: 'Confirm receipt — wallets are updated and booking is closed.',
+            what: 'Tapping Settle Payment immediately:\n1. Booking status → CLOSED\n2. Customer wallet debited 100%\n3. Provider wallet credited 80%\n4. Nestora Admin credited 20%\n5. Customer notified: "✅ Payment confirmed!"\n6. Provider notified: "💰 ₹[amount] credited to your wallet!"',
+            action: 'Tap <strong>✅ Settle Payment</strong> after verifying the UPI transaction.',
+            buttons: [{ l: '✅ Settle Payment', t: 's' }],
+            tip: 'Verify the UPI transaction in your payment app before settling. Settled payments cannot be reversed.'
+          },
+          {
+            title: 'Flag as Not Received',
+            state: 'PAID → PAYMENT_PENDING',
+            sub: 'If the UPI payment was not received, flag it.',
+            what: 'Tapping "🚨 Flag as Not Received":\n1. Booking reverts to PAYMENT_PENDING\n2. Customer is notified: "Payment Not Verified — please try again"\n3. Customer\'s booking card refreshes automatically with the Pay button visible again\n4. Provider is notified of the issue',
+            action: 'Tap <strong>🚨 Flag as Not Received</strong> if the UPI payment didn\'t arrive.',
+            buttons: [{ l: '🚨 Flag as Not Received', t: 'd' }],
+            tip: 'The customer can retry payment as many times as needed. The cycle continues until successful or booking is cancelled.'
+          }
+        ]
+      },
+
+      // ════════════════════════════════ REFERENCE ═══════════════════════════════
+      {
+        id: 'cancellation', group: 'reference', icon: '❌',
+        title: 'Cancellation Fee Guide',
+        desc: 'Understanding when fees apply and how much — for customers and providers.',
+        role: 'k', roleLabel: '📚 Reference',
+        steps: [
+          {
+            title: 'How Cancellation Fees Work',
+            state: 'Any booking status',
+            sub: 'Fees are progressive — the later you cancel, the higher the fee.',
+            what: 'Cancellation fees protect both customers and providers from last-minute cancellations. Early cancellation (REQUESTED / ACCEPTED stage) is always free. Fees increase as the booking progresses through stages.',
+            action: 'Review the fee tables in the next steps before cancelling any active booking.',
+            tip: '<strong>Free threshold:</strong> If the service fee is under ₹250, ALL cancellations are free.\n<strong>Global cap:</strong> ₹1,500 regardless of service fee.'
+          },
+          {
+            title: 'Customer Cancellation Fees',
+            state: 'Customer cancels',
+            sub: 'What the customer pays when they cancel at each stage.',
+            what: `<table class="fee-table">
+<tr><th>Stage when cancelling</th><th>Fee %</th><th>Min</th><th>Max</th></tr>
+<tr><td>REQUESTED / ACCEPTED</td><td style="color:var(--green);font-weight:600">Free</td><td>—</td><td>—</td></tr>
+<tr><td>CONFIRMED</td><td>5%</td><td>₹20</td><td>₹100</td></tr>
+<tr><td>EN_ROUTE (traveling)</td><td>15%</td><td>₹50</td><td>₹300</td></tr>
+<tr><td>ARRIVED</td><td>25%</td><td>₹100</td><td>₹500</td></tr>
+<tr><td>OTP_VERIFIED</td><td>35%</td><td>₹150</td><td>₹750</td></tr>
+<tr><td>SERVICE_STARTED +</td><td style="color:var(--red);font-weight:600">50%</td><td>₹200</td><td>₹1,000</td></tr>
+</table>`,
+            tip: 'Global cap: ₹1,500. Free threshold: service fee under ₹250.'
+          },
+          {
+            title: 'Provider Cancellation Fees',
+            state: 'Provider cancels',
+            sub: 'Lower fees for providers — but still applies after CONFIRMED stage.',
+            what: `<table class="fee-table">
+<tr><th>Stage when cancelling</th><th>Fee %</th><th>Min</th><th>Max</th></tr>
+<tr><td>REQUESTED / ACCEPTED</td><td style="color:var(--green);font-weight:600">Free</td><td>—</td><td>—</td></tr>
+<tr><td>CONFIRMED</td><td>5%</td><td>₹20</td><td>₹100</td></tr>
+<tr><td>EN_ROUTE (traveling)</td><td>10%</td><td>₹50</td><td>₹300</td></tr>
+<tr><td>ARRIVED</td><td>15%</td><td>₹100</td><td>₹500</td></tr>
+<tr><td>OTP_VERIFIED</td><td>20%</td><td>₹150</td><td>₹750</td></tr>
+<tr><td>SERVICE_STARTED +</td><td style="color:var(--red);font-weight:600">25%</td><td>₹200</td><td>₹1,000</td></tr>
+</table>`,
+            tip: 'Provider fees are lower than customer fees as an incentive to commit to bookings.'
+          }
+        ]
+      }
+    ];
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // GROUPS
+    // ─────────────────────────────────────────────────────────────────────────────
+    const GROUPS = [
+      { id: 'customer', label: '👤 Customer Flows' },
+      { id: 'provider', label: '🔧 Provider Flows' },
+      { id: 'kyc', label: '🔑 Verification' },
+      { id: 'profile', label: '📋 Profile & Listing' },
+      { id: 'admin', label: '🛡️ Admin Flows' },
+      { id: 'reference', label: '📚 Reference' }
+    ];
+
+    const ROLE_BADGE = {
+      c: { cls: 'rc', lbl: '👤 Customer' },
+      p: { cls: 'rp', lbl: '🔧 Provider' },
+      a: { cls: 'ra', lbl: '🛡️ Admin' },
+      k: { cls: 'rk', lbl: '🔑 All Users' },
+      b: { cls: 'rb', lbl: '👤🔧 Both' }
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────────────────────────────────────────
+    let currentFlow = null;
+    let currentStep = 0;
+    let mode = 'welcome'; // 'welcome' | 'overview' | 'steps'
+
+    // Visible flows (filtered by role)
+    function visibleFlows() {
+      return FLOWS.filter(f => isAdmin || !f.adminOnly);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      }
+      buildDrawer();
+
+      const flowId = urlParams.get('flow');
+      if (flowId) {
+        const f = visibleFlows().find(f => f.id === flowId);
+        if (f) { loadFlow(f); return; }
+      }
+      showWelcome();
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // DRAWER
+    // ─────────────────────────────────────────────────────────────────────────────
+    function buildDrawer() {
+      const body = document.getElementById('drawer-body');
+      body.innerHTML = '';
+      const vf = visibleFlows();
+
+      for (const g of GROUPS) {
+        const gFlows = vf.filter(f => f.group === g.id);
+        if (!gFlows.length) continue;
+        const grpEl = document.createElement('div');
+        grpEl.className = 'dgroup';
+        grpEl.innerHTML = `<div class="dgroup-lbl">${g.label}</div>`;
+        for (const flow of gFlows) {
+          const item = document.createElement('div');
+          item.className = 'ditem' + (currentFlow && currentFlow.id === flow.id ? ' active' : '');
+          item.dataset.id = flow.id;
+          item.innerHTML = `
+        <div class="ditem-icon">${flow.icon}</div>
+        <div style="flex:1">
+          <div class="ditem-name">${flow.title}</div>
+          <div class="ditem-count">${flow.steps.length} steps</div>
+        </div>`;
+          item.addEventListener('click', () => { loadFlow(flow); closeDrawer(); });
+          grpEl.appendChild(item);
+        }
+        body.appendChild(grpEl);
+      }
+    }
+
+    function openDrawer() { document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open'); buildDrawer(); }
+    function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // SCREENS
+    // ─────────────────────────────────────────────────────────────────────────────
+    function showWelcome() {
+      mode = 'welcome';
+      document.getElementById('welcome').style.display = 'flex';
+      document.getElementById('overview').style.display = 'none';
+      document.getElementById('steps-vp').style.display = 'none';
+      document.getElementById('flow-hdr').style.display = 'none';
+      document.getElementById('nav').classList.remove('show');
+      document.getElementById('overview-btn').style.display = 'none';
+      document.getElementById('hdr-title').textContent = 'Nestora Guide';
+      document.getElementById('hdr-sub').textContent = 'Tap ☰ to pick a flow';
+    }
+
+    function loadFlow(flow) {
+      currentFlow = flow;
+      currentStep = 0;
+
+      // Update header
+      document.getElementById('hdr-sub').textContent = flow.title;
+      const rb = ROLE_BADGE[flow.role] || ROLE_BADGE.k;
+      document.getElementById('fh-icon').textContent = flow.icon;
+      document.getElementById('fh-name').textContent = flow.title;
+      const roleEl = document.getElementById('fh-role');
+      roleEl.textContent = rb.lbl;
+      roleEl.className = 'rbadge ' + rb.cls;
+      document.getElementById('flow-hdr').style.display = 'block';
+      document.getElementById('overview-btn').style.display = 'flex';
+
+      // Build steps
+      buildSteps(flow);
+      showOverview(); // always start with overview
+    }
+
+    // ─── Overview screen ────────────────────────────────────────────────────────
+    function showOverview() {
+      if (!currentFlow) return;
+      mode = 'overview';
+
+      document.getElementById('welcome').style.display = 'none';
+      document.getElementById('steps-vp').style.display = 'none';
+      document.getElementById('overview-btn').style.display = 'flex';
+
+      const ov = document.getElementById('overview');
+      ov.style.cssText = 'display:flex;flex:1;overflow-y:auto;padding:14px 14px 80px;flex-direction:column;gap:14px';
+
+      const rb = ROLE_BADGE[currentFlow.role] || ROLE_BADGE.k;
+
+      ov.innerHTML = `
+    <!-- Hero card -->
+    <div class="ov-hero">
+      <div class="ov-hero-top">
+        <div class="ov-hero-icon">${currentFlow.icon}</div>
+        <div class="ov-hero-title">${currentFlow.title}</div>
+      </div>
+      <div class="ov-hero-sub">${currentFlow.desc}</div>
+      <div class="ov-hero-meta">
+        <span class="rbadge ${rb.cls}">${rb.lbl}</span>
+        <span class="ov-meta-chip">${currentFlow.steps.length} steps</span>
+      </div>
+    </div>
+
+    <!-- Step map title -->
+    <div class="ov-section-title">📋 Complete Step Map — tap any step to jump to it</div>
+
+    <!-- Timeline -->
+    <div class="step-timeline" id="ov-timeline"></div>
+
+    <!-- Start button -->
+    <button class="ov-start-btn" onclick="enterSteps(0)">▶ Start Step-by-Step Guide</button>
+  `;
+
+      // Build timeline
+      const tl = document.getElementById('ov-timeline');
+      currentFlow.steps.forEach((step, i) => {
+        const item = document.createElement('div');
+        item.className = 'tl-item';
+        item.innerHTML = `
+      <div class="tl-left">
+        <div class="tl-num">${i + 1}</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-right">
+        <div class="tl-title">${step.title}</div>
+        <div class="tl-state">${step.state}</div>
+        <div class="tl-sub">${step.sub}</div>
+      </div>
+      <div class="tl-arrow">›</div>
+    `;
+        item.addEventListener('click', () => enterSteps(i));
+        tl.appendChild(item);
+      });
+
+      // Nav bar for overview
+      document.getElementById('nav').classList.add('show');
+      document.getElementById('prev-btn').textContent = '☰ All Flows';
+      document.getElementById('prev-btn').disabled = false;
+      document.getElementById('prev-btn').onclick = openDrawer;
+      document.getElementById('step-ind').textContent = '';
+      document.getElementById('next-btn').textContent = '▶ Start';
+      document.getElementById('next-btn').onclick = () => enterSteps(0);
+    }
+
+    // ─── Steps screen ────────────────────────────────────────────────────────────
+    function enterSteps(stepIndex) {
+      mode = 'steps';
+      document.getElementById('overview').style.display = 'none';
+      document.getElementById('steps-vp').style.display = 'block';
+      renderStep(stepIndex);
+    }
+
+    function buildSteps(flow) {
+      const track = document.getElementById('steps-track');
+      track.innerHTML = '';
+      flow.steps.forEach((step, i) => {
+        const card = document.createElement('div');
+        card.className = 'step-card';
+        card.innerHTML = buildStepHTML(step, i, flow.steps.length);
+        track.appendChild(card);
+      });
+    }
+
+    function buildStepHTML(step, idx, total) {
+      let btnsHTML = '';
+      if (step.buttons && step.buttons.length) {
+        btnsHTML = `<div class="icard">
+      <div class="icard-title">Buttons you\'ll see</div>
+      <div class="btns-row">${step.buttons.map(b => `<span class="bchip ${b.t}">${b.l}</span>`).join('')}</div>
+    </div>`;
+      }
+      let tipHTML = '';
+      if (step.tip) {
+        tipHTML = `<div class="tip">
+      <div class="tip-icon">💡</div>
+      <div class="tip-text">${step.tip}</div>
+    </div>`;
+      }
+      return `
+    <div class="step-num-chip"><div class="dot"></div>Step ${idx + 1} of ${total}</div>
+    <span class="state-lbl">${step.state}</span>
+    <div class="step-h">${step.title}</div>
+    <div class="step-sub">${step.sub}</div>
+    <div class="icard">
+      <div class="icard-title">What\'s happening</div>
+      <div class="icard-body">${step.what.replace(/\n/g, '<br>')}</div>
+    </div>
+    <div class="icard">
+      <div class="icard-title">What to do</div>
+      <div class="icard-body">${step.action}</div>
+    </div>
+    ${btnsHTML}${tipHTML}
+  `;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // NAVIGATION
+    // ─────────────────────────────────────────────────────────────────────────────
+    function renderStep(idx) {
+      if (!currentFlow) return;
+      currentStep = Math.max(0, Math.min(idx, currentFlow.steps.length - 1));
+
+      // Slide
+      document.getElementById('steps-track').style.transform = `translateX(-${currentStep * 100}%)`;
+
+      // Progress
+      const pct = currentFlow.steps.length === 1 ? 100 : (currentStep / (currentFlow.steps.length - 1)) * 100;
+      document.getElementById('prog-fill').style.width = pct + '%';
+      document.getElementById('prog-txt').textContent = `${currentStep + 1} / ${currentFlow.steps.length}`;
+
+      // Nav
+      document.getElementById('nav').classList.add('show');
+      document.getElementById('step-ind').textContent = `${currentStep + 1} / ${currentFlow.steps.length}`;
+
+      const prevBtn = document.getElementById('prev-btn');
+      prevBtn.disabled = false;
+      if (currentStep === 0) {
+        prevBtn.textContent = '📋 Overview';
+        prevBtn.onclick = showOverview;
+      } else {
+        prevBtn.textContent = '← Prev';
+        prevBtn.onclick = () => navigate(-1);
+      }
+
+      const nextBtn = document.getElementById('next-btn');
+      if (currentStep === currentFlow.steps.length - 1) {
+        nextBtn.textContent = '☰ All Flows';
+        nextBtn.onclick = openDrawer;
+      } else {
+        nextBtn.textContent = 'Next →';
+        nextBtn.onclick = () => navigate(1);
+      }
+    }
+
+    function navigate(dir) {
+      if (mode !== 'steps') return;
+      renderStep(currentStep + dir);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // SWIPE (steps only)
+    // ─────────────────────────────────────────────────────────────────────────────
+    let touchX = 0;
+    document.getElementById('steps-vp').addEventListener('touchstart', e => {
+      touchX = e.touches[0].clientX;
+    }, { passive: true });
+    document.getElementById('steps-vp').addEventListener('touchend', e => {
+      const dx = touchX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 48) navigate(dx > 0 ? 1 : -1);
+    }, { passive: true });
+  </script>
+</body>
+
+</html>
