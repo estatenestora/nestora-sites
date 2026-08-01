@@ -1101,35 +1101,35 @@
     const CATALOG = [
       {
         cat: '🏠 Housekeeper & Maintenance', desc: 'Home repair, appliance servicing and maintenance professionals', services: [
-          { e: '🔧', n: 'Plumber', attrs: ['Emergency / 24x7 Available (Yes/No)', 'Pipe materials handled (Multi-select)', 'Specializations (Multi-select)', 'Carries own tools (Yes/No)', 'Visiting charge ₹ (Number)'] },
-          { e: '💡', n: 'Electrician', attrs: ['Emergency / 24x7 Available (Yes/No)', 'Specializations (Multi-select)', 'Industrial wiring experience (Yes/No)', 'Visiting charge ₹ (Number)'] },
-          { e: '❄️', n: 'AC Technician', attrs: ['AC brands serviced (Multi-select) *', 'AC types handled (Multi-select)', 'Gas refilling R22/R32 (Yes/No)', 'Annual maintenance contract (Yes/No)', 'Emergency Available (Yes/No)'] },
-          { e: '🔧', n: 'RO Repair Technician', attrs: [] },
-          { e: '🪚', n: 'Carpenter', attrs: ['Specializations (Multi-select) *', 'Wood types (Multi-select)', 'Own workshop (Yes/No)'] },
-          { e: '🎨', n: 'Painter', attrs: [] },
-          { e: '📺', n: 'TV Repair', attrs: [] },
-          { e: '🧊', n: 'Fridge Repair', attrs: [] },
-          { e: '🧺', n: 'Washing Machine Repair', attrs: [] },
+          { e: '🔧', n: 'Plumber', attrs: ['Specializations (Multi-select) *', 'Visiting charge ₹ (Number)'] },
+          { e: '💡', n: 'Electrician', attrs: ['Specializations (Multi-select) *', 'Visiting charge ₹ (Number)'] },
+          { e: '❄️', n: 'AC Technician', attrs: ['AC brands serviced (Multi-select) *', 'AC types handled (Multi-select)', 'Services Offered (Multi-select) *', 'Visiting charge ₹ (Number)'] },
+          { e: '🔧', n: 'RO Repair Technician', attrs: ['Purifier Brands Handled (Multi-select) *', 'Services Offered (Multi-select) *', 'Visiting charge ₹ (Number)'] },
+          { e: '🪚', n: 'Carpenter', attrs: ['Specializations (Multi-select) *', 'Wood types (Multi-select)', 'Visiting charge ₹ (Number)'] },
+          { e: '🎨', n: 'Painter', attrs: ['Paint Services Offered (Multi-select) *', 'Brands Used (Multi-select)', 'Pricing Basis (Select)'] },
+          { e: '📺', n: 'TV Repair', attrs: ['Appliance Variants (Multi-select) *', 'Brands Handled (Multi-select) *', 'Inspection Charge ₹ (Number)'] },
+          { e: '🧊', n: 'Fridge Repair', attrs: ['Appliance Variants (Multi-select) *', 'Brands Handled (Multi-select) *', 'Inspection Charge ₹ (Number)'] },
+          { e: '🧺', n: 'Washing Machine Repair', attrs: ['Appliance Variants (Multi-select) *', 'Brands Handled (Multi-select) *', 'Inspection Charge ₹ (Number)'] },
           { e: '🚿', n: 'Water Tank Cleaner', attrs: [] },
         ]
       },
       {
         cat: '🧹 Cleaning & Household', desc: 'House cleaning, cooking, babysitting and household help', services: [
-          { e: '🧼', n: 'House Cleaner', attrs: [] },
-          { e: '🧽', n: 'Deep Cleaning', attrs: [] },
+          { e: '🧼', n: 'House Cleaner', attrs: ['Cleaning Types Offered (Multi-select) *', 'Property Sizes Handled (Multi-select)', 'Brings Own Cleaning Material (Yes/No)'] },
+          { e: '🧽', n: 'Deep Cleaning', attrs: ['Cleaning Types Offered (Multi-select) *', 'Property Sizes Handled (Multi-select)', 'Brings Own Cleaning Material (Yes/No)'] },
           { e: '🚿', n: 'Bathroom Cleaning', attrs: [] },
-          { e: '🧑‍🍳', n: 'Maid Service', attrs: [] },
-          { e: '👩‍🍳', n: 'Cook', attrs: ['Cuisines cooked (Multi-select) *', 'Meals provided (Multi-select) *', 'Food preference (Select) *', 'Live-in available (Yes/No)'] },
-          { e: '🧒', n: 'Babysitter', attrs: [] },
-          { e: '👵', n: 'Elder Care', attrs: [] },
-          { e: '🏥', n: 'Patient Care', attrs: [] },
+          { e: '🧑‍🍳', n: 'Maid Service', attrs: ['Work Arrangement (Select) *', 'Domestic Duties (Multi-select) *'] },
+          { e: '👩‍🍳', n: 'Cook', attrs: ['Cuisines cooked (Multi-select) *', 'Meals prepared (Multi-select) *', 'Food preference (Select) *', 'Service mode (Select)'] },
+          { e: '🧒', n: 'Babysitter', attrs: ['Care Arrangement (Select) *', 'Care Specializations (Multi-select)'] },
+          { e: '👵', n: 'Elder Care', attrs: ['Care Arrangement (Select) *', 'Care Specializations (Multi-select)'] },
+          { e: '🏥', n: 'Patient Care', attrs: ['Care Arrangement (Select) *', 'Care Specializations (Multi-select)'] },
           { e: '🧺', n: 'Laundry Service', attrs: [] },
           { e: '🧴', n: 'Ironing Service', attrs: [] },
         ]
       },
       {
         cat: '🚚 Transport & Logistics', desc: 'Packers, movers, delivery and courier services', services: [
-          { e: '📦', n: 'Packers & Movers', attrs: ['Move types (Multi-select) *', 'Vehicles available (Multi-select)', 'Packing included (Yes/No)', 'Transit insurance (Yes/No)', 'Warehouse/storage (Yes/No)'] },
+          { e: '📦', n: 'Packers & Movers', attrs: ['Relocation types (Multi-select) *', 'Vehicles available (Multi-select)', 'Packing materials included (Yes/No)'] },
           { e: '🚚', n: 'Delivery Service', attrs: [] },
           { e: '🚛', n: 'Truck Rental', attrs: [] },
           { e: '🚲', n: 'Bike Transport', attrs: [] },
@@ -1146,8 +1146,8 @@
       },
       {
         cat: '🏗️ Construction & Interior', desc: 'Interior design, construction, carpentry, and renovation', services: [
-          { e: '🛋️', n: 'Interior Designer', attrs: ['Design styles (Multi-select) *', 'Spaces handled (Multi-select) *', '3D visualization provided (Yes/No)', 'Project management included (Yes/No)', 'Portfolio URL'] },
-          { e: '🏛️', n: 'Architect', attrs: [] },
+          { e: '🛋️', n: 'Interior Designer', attrs: ['Design styles (Multi-select) *', 'Target spaces (Multi-select) *', '3D visualization provided (Yes/No)', 'Portfolio link (URL)'] },
+          { e: '🏛️', n: 'Architect', attrs: ['Design styles (Multi-select) *', 'Target spaces (Multi-select) *', '3D visualization provided (Yes/No)', 'Portfolio link (URL)'] },
           { e: '🔧', n: 'False Ceiling Worker', attrs: [] },
           { e: '🍽️', n: 'Modular Kitchen Expert', attrs: [] },
           { e: '🔨', n: 'Glass Worker', attrs: [] },
@@ -1164,13 +1164,13 @@
           { e: '🖨️', n: 'Printer Repair', attrs: [] },
           { e: '📷', n: 'CCTV Monitoring', attrs: [] },
           { e: '🎨', n: 'Graphic Designer', attrs: [] },
-          { e: '📸', n: 'Photographer', attrs: ['Shooting styles (Multi-select) *', 'Camera brands used (Multi-select)', 'Drone photography (Yes/No)', 'Editing included (Yes/No)', 'Photo delivery time in days (Number)', 'Shoot location (Multi-select)', 'Portfolio URL'] },
-          { e: '🎬', n: 'Video Editor', attrs: ['Editing software (Multi-select) *', 'Content types handled (Multi-select) *', 'Motion graphics / VFX (Yes/No)', 'Turnaround time in days (Number)', 'Max video length in minutes (Number)', 'Portfolio URL'] },
+          { e: '📸', n: 'Photographer', attrs: ['Styles / Genres (Multi-select) *', 'Software used (Multi-select)', 'Drone filming available (Yes/No)', 'Portfolio link (URL)'] },
+          { e: '🎬', n: 'Video Editor', attrs: ['Software used (Multi-select) *', 'Content types handled (Multi-select) *', 'Drone filming available (Yes/No)', 'Portfolio link (URL)'] },
         ]
       },
       {
         cat: '🚗 Vehicle Services', desc: 'Car/bike repair, wash, garage and driver services', services: [
-          { e: '🔧', n: 'Mechanic', attrs: [] },
+          { e: '🔧', n: 'Mechanic', attrs: ['Specializations (Multi-select) *'] },
           { e: '🚗', n: 'Car Repair/Wash', attrs: [] },
           { e: '🔧', n: 'Bike Repair', attrs: [] },
           { e: '🏁', n: 'Garage Service', attrs: [] },
@@ -1178,32 +1178,32 @@
         ]
       },
       {
-        cat: '🏘️ Property & Real Estate', desc: 'Brokers, rental agents, PG, hostel and flat owners', services: [
-          { e: '🏢', n: 'Property Dealer', attrs: [] },
-          { e: '🏠', n: 'Rental Agent', attrs: [] },
-          { e: '🏨', n: 'PG Provider', attrs: [] },
-          { e: '🏫', n: 'Hostel Provider', attrs: [] },
-          { e: '🏘️', n: 'Flat Owner', attrs: [] },
-          { e: '💼', n: 'Broker', attrs: ['RERA Registration Number (Text) *', 'Deal types (Multi-select) *', 'Property types (Multi-select)', 'Localities covered (Text area) *', 'Commission % charged (Number)'] },
+        cat: '🏘️ Property & Real Estate', desc: 'Brokers, flat owners, hostel, PG, rental agents, and property dealers', services: [
+          { e: '💼', n: 'Broker', attrs: ['BHK Handled (Select)', 'Furnishing Status (Multi-select)', 'Security Deposit (Select)', 'Deal Types (Multi-select) *', 'Property Types Handled (Multi-select)', 'Parking Available (Select)', 'Amenities Provided (Multi-select)'] },
+          { e: '🏘️', n: 'Flat Owner', attrs: ['BHK (Select) *', 'Furnishing Status (Select) *', 'Security Deposit (Select)', 'Property Type (Select)', 'Preferred Tenants (Multi-select)', 'Parking Available (Select)', 'Amenities Provided (Multi-select)'] },
+          { e: '🏫', n: 'Hostel Provider', attrs: ['Room Sharing Types (Multi-select) *', 'Occupant Type (Select) *', 'Food Included in Rent (Yes/No)', 'Amenities Provided (Multi-select)', 'Security Deposit (Months) (Number)'] },
+          { e: '🏨', n: 'PG Provider', attrs: ['Room Sharing Types (Multi-select) *', 'Occupant Type (Select) *', 'Food Included in Rent (Yes/No)', 'Amenities Provided (Multi-select)', 'Security Deposit (Months) (Number)'] },
+          { e: '🏠', n: 'Rental Agent', attrs: ['BHK Handled (Select)', 'Furnishing Status (Multi-select)', 'Security Deposit (Select)', 'Deal Types (Multi-select) *', 'Property Types Handled (Multi-select)'] },
+          { e: '🏢', n: 'Property Dealer', attrs: ['BHK Handled (Select)', 'Furnishing Status (Multi-select)', 'Security Deposit (Select)', 'Deal Types (Multi-select) *', 'Property Types Handled (Multi-select)'] },
         ]
       },
       {
         cat: '🍽️ Food & Event Services', desc: 'Food mess, catering, restaurant, events and weddings', services: [
-          { e: '🍱', n: 'Food Mess', attrs: [] },
-          { e: '🍽️', n: 'Restaurant', attrs: [] },
-          { e: '🍛', n: 'Caterer', attrs: ['Events catered (Multi-select) *', 'Cuisines (Multi-select) *', 'Minimum plates order (Number)', 'Veg/Non-veg (Select) *', 'Setup & cleanup included (Yes/No)', 'Tasting session available (Yes/No)'] },
-          { e: '🎉', n: 'Event Decorator', attrs: [] },
+          { e: '🍱', n: 'Food Mess', attrs: ['Cuisines Offered (Multi-select) *', 'Dietary Preference (Select) *', 'Minimum Order (Number)'] },
+          { e: '🍽️', n: 'Restaurant', attrs: ['Cuisines Offered (Multi-select) *', 'Dietary Preference (Select) *', 'Minimum Order (Number)'] },
+          { e: '🍛', n: 'Caterer', attrs: ['Cuisines Offered (Multi-select) *', 'Dietary Preference (Select) *', 'Minimum Order (Number)'] },
+          { e: '🎉', n: 'Event Decorator', attrs: ['Guest Capacity Handled (Select) *', 'Decoration Styles (Multi-select)'] },
           { e: '🎧', n: 'DJ Service', attrs: [] },
-          { e: '💍', n: 'Wedding Planner', attrs: ['Max guests handled (Select) *', 'Services included (Multi-select)', 'Wedding types (Multi-select)', 'Minimum budget handled ₹ (Number)'] },
+          { e: '💍', n: 'Wedding Planner', attrs: ['Guest Capacity Handled (Select) *', 'Decoration Styles (Multi-select)'] },
           { e: '⛺', n: 'Tent House', attrs: [] },
           { e: '🍽️', n: 'Canteen', attrs: [] },
         ]
       },
       {
         cat: '💼 Personal & Professional', desc: 'Tutoring, fitness, beauty, tailoring and skilled professionals', services: [
-          { e: '📚', n: 'Tutor', attrs: ['Subjects taught (Multi-select) *', 'Class levels (Multi-select) *', 'Teaching mode (Multi-select) *', 'Languages of instruction (Multi-select)', 'Free demo class available (Yes/No)'] },
-          { e: '🏋️', n: 'Fitness Trainer', attrs: ['Training specialization (Multi-select) *', 'Training location (Multi-select) *', 'Certifications (Text)', 'Group batch available (Yes/No)'] },
-          { e: '🧘', n: 'Yoga Trainer', attrs: [] },
+          { e: '📚', n: 'Tutor', attrs: ['Subjects taught (Multi-select) *', 'Class levels (Multi-select) *', 'Teaching mode (Multi-select) *'] },
+          { e: '🏋️', n: 'Fitness Trainer', attrs: ['Specializations (Multi-select) *', 'Location Mode (Multi-select) *'] },
+          { e: '🧘', n: 'Yoga Trainer', attrs: ['Specializations (Multi-select) *', 'Location Mode (Multi-select) *'] },
           { e: '💃', n: 'Dance Teacher', attrs: [] },
           { e: '🎵', n: 'Music Teacher', attrs: [] },
           { e: '💄', n: 'Beautician', attrs: [] },
@@ -1214,9 +1214,9 @@
       },
       {
         cat: '🩺 Health & Wellness', desc: 'Nurses, physiotherapists, lab tests and medicine delivery', services: [
-          { e: '💪', n: 'Physiotherapist', attrs: [] },
-          { e: '🩺', n: 'Nurse', attrs: ['Nursing License/Registration (Text) *', 'Care specializations (Multi-select) *', 'Shift availability (Multi-select) *', 'Equipment handled (Multi-select)'] },
-          { e: '👩‍⚕️', n: 'Doctor Appointment', attrs: [] },
+          { e: '💪', n: 'Physiotherapist', attrs: ['Medical Specialty / Focus (Multi-select) *', 'Mode (Multi-select) *'] },
+          { e: '🩺', n: 'Nurse', attrs: ['Medical Specialty / Focus (Multi-select) *', 'Mode (Multi-select) *'] },
+          { e: '👩‍⚕️', n: 'Doctor Appointment', attrs: ['Medical Specialty / Focus (Multi-select) *', 'Mode (Multi-select) *'] },
           { e: '🚑', n: 'Ambulance Service', attrs: [] },
           { e: '🔬', n: 'Lab Test Service', attrs: [] },
           { e: '💊', n: 'Medicine Delivery', attrs: [] },
@@ -1422,88 +1422,101 @@
 
       // PROVIDER
       {
-        id: 'register-service', group: 'provider', icon: '🔧', title: 'Register a Service',
-        desc: 'Create your provider listing so customers in your area can find and book you.',
+        id: 'self-register', group: 'provider', icon: '✨', title: 'Self Register (Step-by-Step)',
+        desc: 'Manual step-by-step guided flow to create your provider listing.',
         role: 'p', roleLabel: '🔧 Provider',
         steps: [
           {
             title: 'Check Prerequisites', state: 'MAIN_MENU',
             sub: 'Your account must be KYC-verified before registering a service.',
             what: 'To register a service, you need:\n✅ KYC verified (Aadhaar + Selfie + UPI)\n✅ Name, phone, email set\n✅ Profile photo uploaded\n\nIf any are missing, the bot redirects you to complete them first.',
-            action: 'Tap Register Service from the main menu.',
-            btns: [{ l: '🔧 Register Service', t: 'p', d: 'Opens the service registration flow' }],
+            action: 'Tap ✨ Self Register from the main menu.',
+            btns: [{ l: '✨ Self Register', t: 'p', d: 'Opens the step-by-step guided registration flow' }],
             tip: 'Go to My Profile → 🔐 Start Verification to complete KYC first.'
           },
           {
             title: 'Select Service Category', state: 'WAITING_FOR_CATEGORY',
             sub: 'Choose the broad category your service belongs to.',
-            what: 'A grid of categories appears. Examples: Housekeeper & Maintenance, Cleaning & Household, Transport & Logistics, Digital & Technical, etc. You can register services in multiple categories.',
+            what: 'A grid of categories appears. Examples: Housekeeper & Maintenance, Cleaning & Household, Transport & Logistics, Property & Real Estate, etc.',
             action: 'Tap the category that matches your service.',
             btns: [{ l: '🔙 Back to Menu', t: '', d: 'Return to main menu' }, { l: '⏏️ Exit', t: '', d: 'Exit this flow' }],
           },
           {
             title: 'Select Service Type', state: 'WAITING_FOR_SERVICE_TYPE',
             sub: 'Choose your specific service within the selected category.',
-            what: 'All service types under your chosen category appear — e.g. Plumber, Electrician, AC Technician, Carpenter, etc. Services you\'ve already registered are filtered out.',
+            what: 'All service types under your chosen category appear — e.g. Plumber, Electrician, Flat Owner, Broker, etc.',
             action: 'Tap your specific service type.',
             btns: [{ l: '🔙 Back to Categories', t: '', d: 'Go back to category selection' }],
           },
           {
             title: 'Answer Service Attributes', state: 'WAITING_FOR_ATTRIBUTE',
             sub: 'Answer specific questions about your service — one question at a time.',
-            what: 'The bot asks customized questions for your service type. These are set up by Nestora admin and vary by service. Examples:\n• "AC brands serviced?" — multi-select checkboxes\n• "Emergency / 24x7 Available?" — Yes/No\n• "Visiting charge (₹)?" — type a number\n\nEach question appears one at a time. Attributes marked with * are required.',
+            what: 'The bot asks customized questions for your service type. Examples:\n• "BHK / Furnishing?" for Flat Owner\n• "Specializations / Visiting charge?" for Plumber\n\nEach question appears one at a time. Attributes marked with * are required.',
             action: 'Answer each question. For multi-select, tap options to toggle then tap Done.',
             btns: [{ l: '✅ Done', t: 's', d: 'Confirm multi-select choices' }, { l: '⏭️ Skip', t: '', d: 'Skip this attribute (optional ones only)' }],
-            tip: 'Detailed attribute answers make your listing appear in more filtered searches — fill them carefully!'
+            tip: 'Detailed attribute answers make your listing appear in filtered searches!'
           },
           {
-            title: 'Set Your Base Price (Actual Service Charge)', state: 'WAITING_FOR_PRICING',
-            sub: 'Enter the actual service fee that customers will pay you.',
-            what: 'Type your base price as a plain number (e.g. 500 for ₹500). <strong>Note that this is the actual service charge</strong> you are asking for your service. Customers will book you and pay this amount, so make sure it is accurate, realistic, and genuine. Setting a realistic price attracts more bookings and ensures the customer pays genuinely.',
-            action: 'Type your actual service charge as a number and send.',
-          },
-          {
-            title: 'Is Your Price Negotiable?', state: 'WAITING_FOR_NEGOTIABLE',
-            sub: 'Tell customers whether your price is flexible.',
-            what: 'Tap Yes if you\'re open to price negotiation, or No if your price is firm. This label appears on your profile card so customers know upfront.',
-            action: 'Tap Yes or No.',
-            btns: [{ l: 'Yes', t: 'p', d: 'Price is negotiable' }, { l: 'No', t: '', d: 'Price is fixed' }, { l: '⏭️ Skip', t: '', d: 'Skip this step' }],
-          },
-          {
-            title: 'Upload Portfolio Photos', state: 'WAITING_FOR_MEDIA',
-            sub: 'Upload photos of your past work to build customer trust.',
-            what: 'Send photos of your completed work — installed fixtures, repaired items, finished projects. These appear in your listing gallery and make you stand out from other providers.',
-            action: 'Send one or more photos, or tap Skip.',
-            btns: [{ l: '⏭️ Skip', t: '', d: 'Skip photos and proceed' }],
-            tip: 'Portfolio photos significantly increase booking rates — providers with photos get 3x more bookings!'
+            title: 'Set Your Base Price', state: 'WAITING_FOR_PRICING',
+            sub: 'Enter the actual service fee / rent that customers will pay you.',
+            what: 'Type your base price as a plain number (e.g. 15000 for ₹15,000 rent or 300 for ₹300 visiting fee). Make sure it is accurate, realistic, and genuine.',
+            action: 'Type your actual price/charge as a number and send.',
           },
           {
             title: 'Set Your Service Location', state: 'WAITING_FOR_GPS / WAITING_STATE_SELECTION',
-            sub: 'Tell Nestora where you operate so nearby customers can find you.',
-            what: 'Two options:\n• <strong>Share GPS</strong> — Telegram shares your coordinates. Most accurate, gives you a precise service radius.\n• <strong>Manual</strong> — Select your Indian State from a list, then your City (shown 6 at a time, navigate with Previous/Next).',
+            sub: 'Tell Nestora where you operate or where your property is located.',
+            what: 'Two options:\n• <strong>Share GPS</strong> — Telegram shares your coordinates. Most accurate.\n• <strong>Manual</strong> — Select your Indian State, then City/Area.',
             action: 'Share your GPS location or pick your State → City manually.',
-            btns: [{ l: '📍 Share My Location', t: 'p', d: 'Use GPS for most accurate location' }, { l: '✏️ Enter Location', t: '', d: 'Select state and city manually' }, { l: '◀ Previous', t: '', d: 'Previous page of cities' }, { l: 'Next ▶', t: '', d: 'Next page of cities' }],
-          },
-          {
-            title: 'Write Your Service Description', state: 'WAITING_FOR_DESCRIPTION',
-            sub: 'A short pitch about your service and what makes you stand out.',
-            what: 'Type 2–5 sentences about your service, specialties, certifications, and what sets you apart. This is displayed on your listing and is your chance to convince potential customers.',
-            action: 'Type your description and send.',
-            tip: 'Mention specific specializations (e.g. "expert in inverter AC installation") or certifications to stand out.'
+            btns: [{ l: '📍 Share My Location', t: 'p', d: 'Use GPS for most accurate location' }, { l: '✏️ Enter Location', t: '', d: 'Select state and city manually' }],
           },
           {
             title: 'Review & Confirm', state: 'REGISTRATION_REVIEW',
             sub: 'Review all your entries before publishing your listing.',
-            what: 'A summary card shows everything you\'ve entered. Review carefully. If anything is wrong, tap Edit Details to fix specific fields.',
+            what: 'A summary card shows everything you\'ve entered. Review carefully. Tap Confirm & Save to publish.',
             action: 'Tap Confirm & Save to publish your listing.',
-            btns: [{ l: '✅ Confirm & Save', t: 's', d: 'Publish your listing — goes live immediately' }, { l: '✏️ Edit Details', t: 'w', d: 'Go back and fix any entry' }, { l: '❌ Cancel', t: 'd', d: 'Discard and exit' }],
+            btns: [{ l: '✅ Confirm & Save', t: 's', d: 'Publish your listing — goes live immediately' }, { l: '✏️ Edit Details', t: 'w', d: 'Go back and fix any entry' }],
           },
           {
-            title: 'Listing Published!', state: 'REGISTRATION_CONFIRMED',
-            sub: '🎉 Your service is now live on Nestora!',
-            what: 'Your listing is published and active. Customers in your area can now find and book you. You\'ll receive Telegram notifications for every incoming booking request.',
-            action: 'Return to the main menu. Check Bookings for incoming requests.',
-            tip: 'Register multiple service types by tapping Register Service again from the main menu.'
+            title: 'Listing Published & Lifecycle Rules', state: 'REGISTRATION_CONFIRMED',
+            sub: '🎉 Your service is live on Nestora!',
+            what: '• <strong>Inventory Services (Flat Owner, Broker, PG)</strong>: Allows multiple active listings at the same location. Automatically marks listing as <code>RENTED</code> upon booking completion.\n• <strong>Professional Services (Plumber, Electrician)</strong>: Stays <code>ALWAYS_ON</code> continuously. Only 1 active listing per provider is kept active.',
+            action: 'Return to main menu. Check My Profile to manage listings.',
+            tip: 'Landlords can re-activate a rented property anytime with 1 tap using <code>🔄 Re-list Property</code>!'
+          },
+        ]
+      },
+
+      {
+        id: 'auto-register', group: 'provider', icon: '🤖', title: 'Auto Register (AI-Assisted)',
+        desc: 'Fast AI registration — describe your service in plain English and Nestora fills everything automatically.',
+        role: 'p', roleLabel: '🔧 Provider',
+        steps: [
+          {
+            title: 'Start AI Auto Register', state: 'AISO_PROMPT',
+            sub: 'Launch the AI-assisted fast registration flow.',
+            what: 'Tap 🤖 Auto Register from the main menu. Nestora AI prompts: "Describe your service or property in a single message".',
+            action: 'Tap 🤖 Auto Register from the main menu.',
+            btns: [{ l: '🤖 Auto Register', t: 'p', d: 'Opens the AI-assisted registration flow' }],
+            tip: 'You can type naturally — include service type, location, pricing, and features in one sentence!'
+          },
+          {
+            title: 'Send Natural Description', state: 'AISO_PROCESSING',
+            sub: 'Type your service description in plain English or Hinglish.',
+            what: 'Example prompts:\n• <em>"I have a 2 BHK fully furnished flat for rent in Action Area I, New Town Kolkata for ₹18,000 per month"</em>\n• <em>"I am an experienced plumber in Salt Lake Kolkata charging ₹300 visiting fee"</em>',
+            action: 'Type your sentence and send it.',
+          },
+          {
+            title: 'AI Gap Filling (if needed)', state: 'AISO_COLLECT_GAP',
+            sub: 'If any required detail was missing, AI asks concise follow-up questions.',
+            what: 'Nestora AI extracts your category, service type, location, price, and attributes. If anything is missing (e.g. furnishing status or exact area), it asks 1 question at a time.',
+            action: 'Answer the question or select from option buttons.',
+          },
+          {
+            title: 'Confirm Extracted Summary', state: 'AISO_CONFIRM',
+            sub: 'Review the AI-extracted details and confirm.',
+            what: 'A structured summary card shows all extracted fields (Service Type, Location, Price, Attributes).',
+            action: 'Tap ✅ Confirm & Save to publish instantly.',
+            btns: [{ l: '✅ Confirm & Save', t: 's', d: 'Publishes listing immediately' }, { l: '❌ Cancel', t: 'd', d: 'Discard and restart' }],
           },
         ]
       },
