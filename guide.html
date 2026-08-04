@@ -998,6 +998,136 @@
     #home {
       animation: fadeUp .26s ease
     }
+
+    /* ── FAQ Section ── */
+    .faq-sec {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 14px;
+      padding-bottom: 30px;
+    }
+
+    .faq-filters {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .faq-filter-btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--s2);
+      color: var(--muted);
+      transition: all var(--ease);
+    }
+
+    .faq-filter-btn.active {
+      background: var(--accent);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(88, 166, 255, 0.2);
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .faq-item {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      transition: border-color var(--ease);
+    }
+
+    .faq-item.open {
+      border-color: var(--accent);
+    }
+
+    .faq-item-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      background: var(--surface);
+      user-select: none;
+      transition: background var(--ease);
+    }
+
+    .faq-item-hdr:hover {
+      background: var(--s2);
+    }
+
+    .faq-q {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .faq-icon {
+      font-size: 12px;
+      color: var(--muted);
+      transition: transform var(--ease);
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(90deg);
+      color: var(--accent);
+    }
+
+    .faq-item-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), padding var(--ease);
+      padding: 0 14px;
+      background: var(--bg);
+    }
+
+    .faq-item.open .faq-item-content {
+      max-height: 1000px;
+      transition: max-height 0.3s cubic-bezier(0.85, 0.15, 0.85, 0.15);
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .faq-a {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .faq-a p {
+      margin-bottom: 8px;
+    }
+
+    .faq-a p:last-child {
+      margin-bottom: 0;
+    }
+
+    .faq-a ul {
+      margin-left: 16px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    .faq-a li {
+      margin-bottom: 4px;
+    }
+
+    .faq-a strong {
+      color: var(--accent);
+    }
   </style>
 </head>
 
@@ -1064,8 +1194,19 @@
 
         <button class="start-guide" onclick="openDrawer()">☰ Browse All Flows — Start Your Guide</button>
 
-        <div class="section-title">📁 Service Categories & All Services</div>
         <div class="cat-grid" id="cat-grid"></div>
+
+        <div class="section-title" style="margin-top: 24px;">🙋 Frequently Asked Questions (FAQ)</div>
+        <div class="faq-sec">
+          <div class="faq-filters">
+            <button class="faq-filter-btn active" onclick="filterFaq('all', this)">All</button>
+            <button class="faq-filter-btn" onclick="filterFaq('customer', this)">👤 Customers</button>
+            <button class="faq-filter-btn" onclick="filterFaq('provider', this)">💼 Providers</button>
+          </div>
+          <div class="faq-list" id="faq-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
       </div>
 
       <!-- Overview screen -->
@@ -1222,6 +1363,62 @@
           { e: '💊', n: 'Medicine Delivery', attrs: [] },
         ]
       },
+    ];
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // FAQ DATA
+    // ─────────────────────────────────────────────────────────────────────────────
+    const FAQ_DATA = [
+      {
+        q: "How do I search and book a service on Nestora?",
+        a: "To book a service, tap the <strong>🔍 Find Service</strong> button on the main bot menu and describe your requirement (e.g., <em>'Plumber needed in HSR Layout for a leaky faucet'</em>). Nestora will show you matching verified providers. Tap on any provider card to view details, then tap <strong>Book</strong> to confirm pricing and send a booking request directly to their Telegram chat.",
+        cat: "customer"
+      },
+      {
+        q: "What do the provider Trust Scores and badges mean?",
+        a: "Every Nestora provider has a Trust Score computed dynamically from their job history. Badges include:<ul><li><strong>⭐ Nestora Elite (Platinum: 90-100)</strong>: Best-in-class service, lowest commission, unlimited bookings.</li><li><strong>🏅 Top Rated (Gold: 75-89)</strong>: Highly reliable, cap of 100 bookings/day.</li><li><strong>✅ Verified (Silver: 50-74)</strong>: Standard checked profile, cap of 50 bookings/day.</li><li><strong>⚠️ Needs Improvement (Bronze: 25-49)</strong>: Low score, higher commission penalty, cap of 30 bookings/day.</li><li><strong>🚫 Under Review (Restricted: 0-24)</strong>: Restricted state, hidden from default search, cap of 10 bookings/day.</li></ul>",
+        cat: "customer"
+      },
+      {
+        q: "How does the cancellation policy and fee structure work?",
+        a: "Nestora has a <strong>3-minute grace period</strong> after booking acceptance. If a customer or provider cancels after 3 minutes, they may be charged a cancellation fee based on their trust tier (up to 20-25% of the booking value). The fee is deducted from the wallet of the party who cancelled and credited to the other party to cover transportation or booking loss.",
+        cat: "customer"
+      },
+      {
+        q: "How do payments work? Is it secure?",
+        a: "When a job is marked completed, the provider submits the final bill. You can pay securely using your <strong>Nestora Wallet</strong> or choose offline payment (UPI, cash, etc.). For offline payments, customers upload the payment screenshot directly in the Telegram chat, which the provider verifies before closing the booking.",
+        cat: "customer"
+      },
+      {
+        q: "What if a provider doesn't show up or does a poor job?",
+        a: "You can track the provider's live status in Telegram (e.g. <em>Provider En Route</em>, <em>Arrived</em>). If they don't show up, you can cancel the request. If there's an issue with the quality of work, you can mark the booking status as <strong>DISPUTED</strong>, which freezes payment release and alerts Nestora Support for arbitration.",
+        cat: "customer"
+      },
+      {
+        q: "How can I register as a provider and list my services?",
+        a: "Tap the <strong>💼 Register as Provider</strong> button in the main Telegram menu. The AI-guided assistant will ask for your name, phone, service category, experience, and service area. Once the details are gathered, your listing is created instantly.",
+        cat: "provider"
+      },
+      {
+        q: "Can I create multiple listings under one account?",
+        a: "Nestora enforces rules based on listing types:<ul><li><strong>Skill/Service listings</strong> (plumbers, cooks, tutors, electricians): <strong>Only one active listing is allowed per provider</strong> to keep listings unique and prevent spam. Creating a new one automatically deactivates the older one.</li><li><strong>Property/Real estate listings</strong> (PGs, flat owners, hostels, brokers): <strong>Multiple listings are allowed</strong> to enable managers to list separate properties or beds.</li></ul>",
+        cat: "provider"
+      },
+      {
+        q: "How is my Trust Score calculated?",
+        a: "Your score (0 to 100) is calculated from 8 key parameters:<ul><li><strong>Acceptance Rate (15%)</strong>: Percentage of requests you accept.</li><li><strong>Completion Rate (20%)</strong>: Completed jobs vs cancellations.</li><li><strong>Cancellation Penalty (15%)</strong>: Provider cancellations deduct 10 points each.</li><li><strong>On-Time Rate (10%)</strong>: Arriving within 15 minutes of scheduled time.</li><li><strong>Review Score (20%)</strong>: Customer ratings average.</li><li><strong>Response Time (10%)</strong>: Capped at 5 minutes response time.</li><li><strong>Dispute Rate (5%)</strong>: Percentage of disputed bookings.</li><li><strong>Profile Completeness (5%)</strong>: Completing bio, avatar, KYC verification, and portfolio.</li></ul>",
+        cat: "provider"
+      },
+      {
+        q: "What are my daily booking limits as a provider?",
+        a: "Daily limits are based on your trust score tier:<ul><li><strong>Platinum</strong>: Unlimited bookings/day.</li><li><strong>Gold</strong>: 100 bookings/day.</li><li><strong>Silver</strong>: 50 bookings/day.</li><li><strong>Bronze</strong>: 30 bookings/day.</li><li><strong>Restricted</strong>: 10 bookings/day.</li><li><strong>Suspended</strong>: 0 bookings/day (blocked from receiving new requests).</li></ul>",
+        cat: "provider"
+      },
+      {
+        q: "How do I pause my listing or mark a property as rented?",
+        a: "If you rent a property privately or are unavailable for services, you can toggle your listing status. Tap <strong>[ ⏸️ Pause Listing ]</strong> or <strong>[ 🔴 Mark Rented ]</strong> in the Nestora bot to mark it <strong>INACTIVE</strong>, which instantly hides it from search results. For property listings, the listing automatically becomes <strong>INACTIVE</strong> once a customer booking is completed/paid.",
+        cat: "provider"
+      }
     ];
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -2039,6 +2236,65 @@
     function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open') }
 
     // ─────────────────────────────────────────────────────────────────────────────
+    // FAQ HELPERS
+    // ─────────────────────────────────────────────────────────────────────────────
+    function renderFaq(filterCat = 'all') {
+      const listContainer = document.getElementById('faq-list');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+
+      const filtered = FAQ_DATA.filter(item => filterCat === 'all' || item.cat === filterCat);
+
+      filtered.forEach((item, idx) => {
+        const el = document.createElement('div');
+        el.className = 'faq-item';
+        el.innerHTML = `
+          <div class="faq-item-hdr" onclick="toggleFaq(this)">
+            <span class="faq-q">${item.q}</span>
+            <span class="faq-icon">▶</span>
+          </div>
+          <div class="faq-item-content">
+            <div class="faq-a">${item.a}</div>
+          </div>
+        `;
+        listContainer.appendChild(el);
+      });
+    }
+
+    function toggleFaq(hdr) {
+      const item = hdr.parentElement;
+      const isOpen = item.classList.contains('open');
+      
+      // Close all other FAQ items for a neat accordion experience
+      document.querySelectorAll('.faq-item').forEach(el => {
+        if (el !== item) {
+          el.classList.remove('open');
+          const content = el.querySelector('.faq-item-content');
+          if (content) content.style.maxHeight = null;
+        }
+      });
+
+      if (isOpen) {
+        item.classList.remove('open');
+        const content = item.querySelector('.faq-item-content');
+        if (content) content.style.maxHeight = null;
+      } else {
+        item.classList.add('open');
+        const content = item.querySelector('.faq-item-content');
+        if (content) content.style.maxHeight = content.scrollHeight + 'px';
+      }
+    }
+
+    function filterFaq(category, btn) {
+      // Toggle active filter button styling
+      document.querySelectorAll('.faq-filter-btn').forEach(b => b.classList.remove('remove'));
+      document.querySelectorAll('.faq-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      renderFaq(category);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
     // SCREENS
     // ─────────────────────────────────────────────────────────────────────────────
     function showHome() {
@@ -2050,6 +2306,7 @@
       document.getElementById('nav').classList.remove('show');
       document.getElementById('hdr-title').textContent = '🏠 Nestora';
       document.getElementById('hdr-sub').textContent = 'Tap ☰ to browse all flows';
+      renderFaq();
     }
 
     function loadFlow(flow) {
